@@ -6,10 +6,11 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 
 - [x] statically linked nodejs to host PostGraphile
 - [x] neon bindings to call into PostGraphile middleware
-- [ ] correlate queries and responses
-- [ ] Smithy interface
+- [x] correlate queries and responses
+- [x] Smithy interface
+- [x] wasmCloud provider
+- [ ] tests
 - [ ] package node modules in binary
-- [ ] wasmCloud provider
 
 ## Notes
 
