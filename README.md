@@ -14,4 +14,4 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 ## Notes
 
 1. This is a work in progress and not suitable for use anywhere, yet.
-2. create a `.env` file with the postgres `DATABASE_URL` (this will ultimately be configured by the wasmCloud link)
+2. create a `provider/.env` file with the postgres `DATABASE_URL` (this will ultimately be configured by the wasmCloud link)

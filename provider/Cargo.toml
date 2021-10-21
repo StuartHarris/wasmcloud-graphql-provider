@@ -1,7 +1,8 @@
 [package]
+authors = ["stuart.harris@red-badger.com"]
 edition = "2018"
-exclude = ["index.node"]
-name = "node-from-rust"
+license = "MIT"
+name = "wasmcloud-graphql-provider"
 version = "0.1.0"
 
 [dependencies]
@@ -18,4 +19,8 @@ zip-extract = "0.1"
 [build-dependencies.attohttpc]
 default-features = false # No need for the compress feature
 features = ["tls-rustls"] 
-version = "0.18.0"
+version = "0.18.0" 
+
+[[bin]]
+name = "wasmcloud-graphql-provider"
+path = "src/main.rs"

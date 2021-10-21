@@ -1,0 +1,5 @@
+# Cargo.lock is not included for interface libraries
+Cargo.lock
+build/
+dist/
+**/target/
