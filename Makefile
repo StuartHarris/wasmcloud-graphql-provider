@@ -6,7 +6,3 @@ default: clean
 .PHONY: clean
 clean:
 	rm -rf ./dist
-
-.PHONY: server
-server: clean
-	yarn && yarn start

@@ -13,14 +13,13 @@
     "@graphile-contrib/pg-many-to-many": "^1.0.1",
     "@graphile-contrib/pg-simplify-inflector": "^6.1.0",
     "dotenv": "^10.0.0",
-    "fastify": "^3.22.1",
     "express": "4.17.1",
-    "postgraphile": "^4.12.4",
+    "postgraphile": "^4.12.5",
     "postgraphile-plugin-connection-filter": "^2.2.2",
     "supertest": "6.1.6"
   },
   "devDependencies": {
-    "@types/node": "^16.11.1",
+    "@types/node": "^16.11.2",
     "@types/express": "^4.17.13",
     "@types/supertest": "^2.0.11",
     "ts-node": "^10.3.0",

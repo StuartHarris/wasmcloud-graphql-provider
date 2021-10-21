@@ -32,21 +32,16 @@ export const options: PostGraphileOptions = {
     };
   },
   watchPg: true,
-  graphiql: true,
-  enhanceGraphiql: true,
-  subscriptions: true,
+  graphiql: false,
+  enhanceGraphiql: false,
+  subscriptions: false,
   dynamicJson: true,
   setofFunctionsContainNulls: false,
   ignoreRBAC: false,
   ignoreIndexes: false,
   showErrorStack: "json",
   extendedErrors: ["hint", "detail", "errcode"],
-  allowExplain: true,
+  allowExplain: false,
   legacyRelations: "omit",
-  exportGqlSchemaPath: `${__dirname}/schema.graphql`,
   sortExport: true,
 };
-
-export const port: number = process.env.PORT
-  ? parseInt(process.env.PORT, 10)
-  : 3000;

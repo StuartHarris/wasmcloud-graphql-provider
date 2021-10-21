@@ -35,7 +35,7 @@ fn require() {
             .get(&mut cx, "require")?
             .downcast_or_throw(&mut cx)?;
         let undefined = cx.undefined();
-        let module_path: Handle<JsString> = cx.string("./dist/src/middleware.js");
+        let module_path: Handle<JsString> = cx.string("./dist/src/index.js");
         let module = require.call(&mut cx, undefined, vec![module_path])?;
         cx.global().set(&mut cx, "query", module)?;
         Ok(())
