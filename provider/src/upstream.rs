@@ -35,8 +35,9 @@ pub fn init(instance: &str) {
     .unwrap();
 }
 
-pub fn query(instance: &str, query: &'static str) -> QueryResult {
+pub fn query(instance: &str, query: &str) -> QueryResult {
     let instance = instance.to_owned();
+    let query = query.to_owned();
     sync_node(move |mut cx| {
         let script = cx.string(format!("query_{}.run", instance));
         let func: Handle<JsFunction> = eval(&mut cx, script)?.downcast_or_throw(&mut cx)?;
@@ -83,7 +84,7 @@ fn sync_node<T: Send + 'static>(
     rx.recv().ok()
 }
 
-pub(crate) fn remove(instance: &str) {
+pub fn remove(instance: &str) {
     let instance = instance.to_owned();
     sync_node(move |mut cx| {
         let undefined = cx.undefined();

@@ -1,4 +1,3 @@
-use log::debug;
 use std::{convert::Infallible, sync::Arc};
 use tokio::sync::RwLock;
 use upstream::QueryResult;
@@ -70,23 +69,9 @@ impl ProviderHandler for GraphQLProvider {
 /// Handle GraphQL methods
 #[async_trait]
 impl GraphQL for GraphQLProvider {
-    /// updates the text on the GraphQL display
+    /// Execute the GraphQL query
     async fn query(&self, _ctx: &Context, req: &QueryRequest) -> RpcResult<QueryResponse> {
-        debug!("processing request update({})", req.query);
-        match upstream::query(
-            "1",
-            r#"
-		query MyQuery {
-			productLists {
-				nodes {
-					nodeId
-					userId
-					id
-					title
-				}
-			}
-		}"#,
-        ) {
+        match upstream::query("1", &req.query) {
             QueryResult::Ok(result) => Ok(QueryResponse { data: result }),
             QueryResult::Err(err) => Err(RpcError::MethodNotHandled(err)),
         }

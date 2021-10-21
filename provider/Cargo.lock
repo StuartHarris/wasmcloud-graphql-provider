@@ -3115,7 +3115,6 @@ dependencies = [
  "attohttpc 0.18.0",
  "futures 0.3.17",
  "hex",
- "log",
  "nodejs",
  "once_cell",
  "sha-1 0.9.8",
