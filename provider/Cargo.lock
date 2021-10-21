@@ -3120,6 +3120,7 @@ dependencies = [
  "once_cell",
  "sha-1 0.9.8",
  "strum 0.22.0",
+ "tokio",
  "wasmbus-rpc",
  "wasmcloud-graphql-interface",
  "zip-extract",
