@@ -23,7 +23,7 @@ serde_bytes = "0.11"
 serde_json = "1.0.68"
 wasmbus-rpc = "0.5.1"
 
-[d0.5.1dependencies]
+[dev-dependencies]
 base64 = "0.13"
 
 # build-dependencies needed for build.rs

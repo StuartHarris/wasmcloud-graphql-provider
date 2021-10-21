@@ -13,13 +13,19 @@ use wasmbus_rpc::{
 pub const SMITHY_VERSION: &str = "1.0";
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Request {
+pub struct QueryRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub headers: Option<String>,
     #[serde(default)]
     pub query: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub variables: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct QueryResponse {
+    #[serde(default)]
+    pub data: String,
 }
 
 /// wasmbus.contractId: stuart-harris:graphql-provider
@@ -30,7 +36,7 @@ pub trait GraphQL {
     fn contract_id() -> &'static str {
         "stuart-harris:graphql-provider"
     }
-    async fn query(&self, ctx: &Context, arg: &Request) -> RpcResult<()>;
+    async fn query(&self, ctx: &Context, arg: &QueryRequest) -> RpcResult<QueryResponse>;
 }
 
 /// GraphQLReceiver receives messages defined in the GraphQL service trait
@@ -40,7 +46,7 @@ pub trait GraphQLReceiver: MessageDispatch + GraphQL {
     async fn dispatch(&self, ctx: &Context, message: &Message<'_>) -> RpcResult<Message<'_>> {
         match message.method {
             "Query" => {
-                let value: Request = deserialize(message.arg.as_ref())
+                let value: QueryRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = GraphQL::query(self, ctx, &value).await?;
                 let buf = Cow::Owned(serialize(&resp)?);
@@ -101,7 +107,7 @@ impl GraphQLSender<wasmbus_rpc::actor::prelude::WasmHost> {
 #[async_trait]
 impl<T: Transport + std::marker::Sync + std::marker::Send> GraphQL for GraphQLSender<T> {
     #[allow(unused)]
-    async fn query(&self, ctx: &Context, arg: &Request) -> RpcResult<()> {
+    async fn query(&self, ctx: &Context, arg: &QueryRequest) -> RpcResult<QueryResponse> {
         let arg = serialize(arg)?;
         let resp = self
             .transport
@@ -114,6 +120,8 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> GraphQL for GraphQLSe
                 None,
             )
             .await?;
-        Ok(())
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Query", e)))?;
+        Ok(value)
     }
 }

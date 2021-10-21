@@ -19,14 +19,20 @@ service GraphQL {
 }
 
 operation Query { 
-  input: Request
+  input: QueryRequest,
+  output: QueryResponse
 }
 
-structure Request {
+structure QueryRequest {
   @required
   query: String,
 
   variables: String,
 
   headers: String
+}
+
+structure QueryResponse {
+  @required
+  data: String
 }

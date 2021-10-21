@@ -6,13 +6,14 @@ VERSION = 0.1.0
 REVISION = 0
 
 .PHONY: default
-default: clean
+default:
 	yarn && yarn build
 	cargo run
 
 .PHONY: clean
 clean:
 	rm -rf ./dist
+	cargo clean
 
 .PHONY: build
 build:
