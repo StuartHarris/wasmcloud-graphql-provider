@@ -1,12 +1,14 @@
 use sha1::{Digest, Sha1};
-use std::env;
-use std::ffi::OsStr;
-use std::fs::File;
-use std::path::{Path, PathBuf};
-use strum::ToString;
+use std::{
+    env,
+    ffi::OsStr,
+    fs::File,
+    path::{Path, PathBuf},
+};
+use strum::Display;
 
 const NODE_VERSION: &str = "v16.9.1";
-#[derive(Debug, Eq, PartialEq, Copy, Clone, ToString)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Display)]
 #[strum(serialize_all = "camelCase")]
 enum TargetOS {
     Darwin,
@@ -14,7 +16,7 @@ enum TargetOS {
     Linux,
 }
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone, ToString)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Display)]
 #[strum(serialize_all = "camelCase")]
 enum TargetArch {
     X64,
@@ -109,11 +111,12 @@ fn main() -> anyhow::Result<()> {
     let arch = match env::var("CARGO_CFG_TARGET_ARCH")?.as_str() {
         "x86" => Ok(TargetArch::X86),
         "x86_64" => Ok(TargetArch::X64),
-        other => Err(other.to_string())
+        other => Err(other.to_string()),
     };
     if let Ok(TargetOS::Win32) = os {
         let target_env = env::var("CARGO_CFG_TARGET_ENV")?;
-        if target_env != "msvc" { // Can't link to Nodejs under windows-gnu
+        if target_env != "msvc" {
+            // Can't link to Nodejs under windows-gnu
             anyhow::bail!("Unsupported Environment ABI: {}", target_env)
         }
     }
@@ -184,9 +187,9 @@ fn main() -> anyhow::Result<()> {
         Ok(TargetOS::Darwin | TargetOS::Linux) => vec!["-rdynamic"],
         Ok(TargetOS::Win32) => match arch {
             Ok(TargetArch::X86) => vec!["/SAFESEH:NO"],
-            _ => vec![]
+            _ => vec![],
         },
-        _ => vec![]
+        _ => vec![],
     };
 
     for link_arg in link_args {
