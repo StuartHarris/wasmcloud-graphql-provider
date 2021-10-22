@@ -1,9 +1,10 @@
 [package]
 authors = ["stuart.harris@red-badger.com"]
 description = "Interface library for GraphQL capability, "
-edition = "2018"
+edition = "2021"
 license = "MIT"
 name = "wasmcloud-graphql-interface"
+rust-version = "1.56.0"
 version = "0.1.0"
 
 # when publishing to crates.io, freeze src by omitting build.rs
@@ -21,11 +22,11 @@ futures = "0.3"
 serde = {version = "1.0", features = ["derive"]}
 serde_bytes = "0.11"
 serde_json = "1.0.68"
-wasmbus-rpc = "0.5.1"
+wasmbus-rpc = "=0.4.4"
 
 [dev-dependencies]
 base64 = "0.13"
 
 # build-dependencies needed for build.rs
 [build-dependencies]
-weld-codegen = "0.2.1"
+weld-codegen = "=0.1.18"

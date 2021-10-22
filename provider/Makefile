@@ -26,7 +26,7 @@ build:
 	tar -czf build/build.tgz node_modules dist
 	cargo build --release
 	wash par create \
-		--arch aarch64-linux \
+		--arch x86_64-macos \
 		--binary target/release/$(PROJECT) \
 		--capid $(CAPABILITY_ID) \
 		--name $(NAME) \

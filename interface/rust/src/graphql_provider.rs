@@ -1,10 +1,14 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
+// This file is generated automatically using wasmcloud-weld and smithy model definitions
 //
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#![allow(clippy::ptr_arg)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Cow, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -74,10 +78,6 @@ impl<T: Transport> GraphQLSender<T> {
     /// Constructs a GraphQLSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
     }
 }
 

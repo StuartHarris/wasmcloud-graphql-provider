@@ -18,6 +18,7 @@ service GraphQL {
   operations: [ Query ]
 }
 
+@readonly
 operation Query { 
   input: QueryRequest,
   output: QueryResponse
