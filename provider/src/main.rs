@@ -1,24 +1,38 @@
 use std::{convert::Infallible, sync::Arc};
+use temp_dir::TempDir;
 use tokio::sync::RwLock;
 use upstream::QueryResult;
 use wasmbus_rpc::provider::prelude::*;
 use wasmcloud_graphql_interface::{GraphQL, GraphQLReceiver, QueryRequest, QueryResponse};
 
+mod unpack_files;
 mod upstream;
 
 const DATABASE_URL_KEY: &str = "DATABASE_URL";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    provider_main(GraphQLProvider::default())?;
+    let temp_dir = TempDir::new()?;
+    unpack_files::unpack(&temp_dir)?;
+    provider_main(GraphQLProvider::new(temp_dir))?;
 
     eprintln!("GraphQL provider exiting");
     Ok(())
 }
 
-#[derive(Default, Clone, Provider)]
+#[derive(Clone, Provider)]
 #[services(GraphQL)]
 struct GraphQLProvider {
+    node_files: Arc<RwLock<Option<TempDir>>>,
     instance: Arc<RwLock<Option<String>>>,
+}
+
+impl GraphQLProvider {
+    fn new(node_files: TempDir) -> Self {
+        Self {
+            node_files: Arc::new(RwLock::new(Some(node_files))),
+            instance: Arc::new(RwLock::new(None)),
+        }
+    }
 }
 
 /// use default implementations of provider message handlers
@@ -45,7 +59,10 @@ impl ProviderHandler for GraphQLProvider {
 				DATABASE_URL_KEY
 			)));
         }
-        upstream::init("1");
+        let node_files = self.node_files.read().await;
+        if let Some(node_files) = &*node_files {
+            upstream::init("1", &node_files.path().to_string_lossy());
+        }
         *instance = database_url;
         Ok(true)
     }
@@ -62,6 +79,8 @@ impl ProviderHandler for GraphQLProvider {
         let mut instance = self.instance.write().await;
         upstream::remove("1");
         *instance = None;
+        let mut node_files = self.node_files.write().await;
+        *node_files = None; // will remove temporary node files directory because TempDir is dropped
         Ok(())
     }
 }

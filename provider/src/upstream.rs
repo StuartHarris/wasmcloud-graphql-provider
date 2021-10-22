@@ -18,15 +18,16 @@ impl Finalize for QueryResult {}
 
 /// load (an instance of?) the PostGraphile middleware into node
 /// - not sure yet whether we can actually have isolated instances
-pub fn init(instance: &str) {
+pub fn init(instance: &str, node_files: &str) {
     let instance = instance.to_owned();
+    let module_path = format!("{}/dist/src/index.js", node_files);
     sync_node(move |mut cx| {
         let require: Handle<JsFunction> = cx
             .global()
             .get(&mut cx, "require")?
             .downcast_or_throw(&mut cx)?;
         let undefined = cx.undefined();
-        let module_path: Handle<JsString> = cx.string("./dist/src/index.js");
+        let module_path: Handle<JsString> = cx.string(module_path);
         let module = require.call(&mut cx, undefined, vec![module_path])?;
         cx.global()
             .set(&mut cx, format!("query_{}", instance).as_ref(), module)?;

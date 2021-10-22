@@ -8,16 +8,22 @@ REVISION = 0
 .PHONY: default
 default:
 	yarn && yarn build
+	yarn --production
+	mkdir -p build
+	tar -czf build/build.tgz node_modules dist
 	cargo run
 
 .PHONY: clean
 clean:
-	rm -rf ./dist
+	rm -rf ./dist ./build
 	cargo clean
 
 .PHONY: build
 build:
 	yarn && yarn build
+	yarn --production
+	mkdir -p build
+	tar -czf build/build.tgz node_modules dist
 	cargo build --release
 	wash par create \
 		--arch aarch64-linux \
