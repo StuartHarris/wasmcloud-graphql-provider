@@ -1,9 +1,9 @@
 [package]
 authors = ["stuart.harris@red-badger.com"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 name = "wasmcloud-graphql-provider"
-resolver = "2"
+rust-version = "1.56.0"
 version = "0.1.0"
 
 [dependencies]
