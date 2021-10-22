@@ -16,12 +16,13 @@ pub enum QueryResult {
 
 impl Finalize for QueryResult {}
 
-/// load (an instance of?) the PostGraphile middleware into node
-/// - not sure yet whether we can actually have isolated instances
-pub fn init(instance: &str, node_files: &str) {
-    let instance = instance.to_owned();
+/// load the PostGraphile middleware into node
+/// - todo: work out if we can have isolated instances
+pub fn init(database_url: &str, node_files: &str) {
+    let database_url = database_url.to_owned();
     let module_path = format!("{}/dist/src/index.js", node_files);
     sync_node(move |mut cx| {
+        // load module
         let require: Handle<JsFunction> = cx
             .global()
             .get(&mut cx, "require")?
@@ -29,18 +30,23 @@ pub fn init(instance: &str, node_files: &str) {
         let undefined = cx.undefined();
         let module_path: Handle<JsString> = cx.string(module_path);
         let module = require.call(&mut cx, undefined, vec![module_path])?;
-        cx.global()
-            .set(&mut cx, format!("query_{}", instance).as_ref(), module)?;
+        cx.global().set(&mut cx, "mod", module)?;
+
+        // call init function
+        let script = cx.string("mod.init");
+        let func: Handle<JsFunction> = eval(&mut cx, script)?.downcast_or_throw(&mut cx)?;
+        let undefined = cx.undefined();
+        let database_url: Handle<JsValue> = cx.string(database_url).upcast();
+        func.call(&mut cx, undefined, vec![database_url])?;
         Ok(())
     })
     .unwrap();
 }
 
-pub fn query(instance: &str, query: &str) -> QueryResult {
-    let instance = instance.to_owned();
+pub fn query(query: &str) -> QueryResult {
     let query = query.to_owned();
     sync_node(move |mut cx| {
-        let script = cx.string(format!("query_{}.run", instance));
+        let script = cx.string("mod.query");
         let func: Handle<JsFunction> = eval(&mut cx, script)?.downcast_or_throw(&mut cx)?;
         let undefined = cx.undefined();
         let query: Handle<JsValue> = cx.string(query).upcast();
@@ -85,12 +91,10 @@ fn sync_node<T: Send + 'static>(
     rx.recv().ok()
 }
 
-pub fn remove(instance: &str) {
-    let instance = instance.to_owned();
+pub fn remove() {
     sync_node(move |mut cx| {
         let undefined = cx.undefined();
-        cx.global()
-            .set(&mut cx, format!("query_{}", instance).as_ref(), undefined)?;
+        cx.global().set(&mut cx, "mod", undefined)?;
         Ok(())
     })
     .unwrap();

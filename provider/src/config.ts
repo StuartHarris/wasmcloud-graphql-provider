@@ -1,14 +1,7 @@
 import manyToMany from "@graphile-contrib/pg-many-to-many";
 import inflector from "@graphile-contrib/pg-simplify-inflector";
-import { config } from "dotenv";
-import type { Pool } from "pg";
 import { PostGraphileOptions } from "postgraphile";
 import filter from "postgraphile-plugin-connection-filter";
-config();
-
-// Connection string (or pg.Pool) for PostGraphile to use
-export const database: string | Pool =
-  process.env.DATABASE_URL || "postgraphile";
 
 // Database schemas to use
 export const schemas: string | string[] = ["public"];

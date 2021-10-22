@@ -1,19 +1,32 @@
 import express from "express";
+import { ParamsDictionary, RequestHandler } from "express-serve-static-core";
 import { postgraphile } from "postgraphile";
+import { ParsedQs } from "qs";
 import request from "supertest";
-import { database, options, schemas } from "./config";
+import { options, schemas } from "./config";
 
 interface ICallback {
   (error: Error | null, result?: string): void;
 }
 
-export const middleware = postgraphile(database, schemas, options);
+let middleware: RequestHandler<
+  ParamsDictionary,
+  { text: string },
+  any,
+  ParsedQs,
+  Record<string, any>
+> & { graphqlRoute: string };
+let agent: request.SuperAgentTest;
 
-const app = express();
-app.use(middleware);
-const agent = request.agent(app);
+export const init = (database: string) => {
+  middleware = postgraphile(database, schemas, options);
 
-export const run = (query: string, cb: ICallback) => {
+  const app = express();
+  app.use(middleware);
+  agent = request.agent(app);
+};
+
+export const query = (query: string, cb: ICallback) => {
   agent
     .post(middleware.graphqlRoute)
     .set("Content-Type", "application/json")

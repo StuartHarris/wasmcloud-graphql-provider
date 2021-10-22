@@ -23,14 +23,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[services(GraphQL)]
 struct GraphQLProvider {
     node_files: Arc<RwLock<Option<TempDir>>>,
-    instance: Arc<RwLock<Option<String>>>,
+    database_url: Arc<RwLock<Option<String>>>,
 }
 
 impl GraphQLProvider {
     fn new(node_files: TempDir) -> Self {
         Self {
             node_files: Arc::new(RwLock::new(Some(node_files))),
-            instance: Arc::new(RwLock::new(None)),
+            database_url: Arc::new(RwLock::new(None)),
         }
     }
 }
@@ -44,7 +44,7 @@ impl ProviderHandler for GraphQLProvider {
     /// If the link is allowed, return true, otherwise return false to deny the link.
     async fn put_link(&self, ld: &LinkDefinition) -> RpcResult<bool> {
         let database_url = match ld.values.get(DATABASE_URL_KEY) {
-            Some(v) => Some(v.to_string()),
+            Some(v) => v,
             None => {
                 return Err(RpcError::InvalidParameter(format!(
                     "{} must be set",
@@ -52,32 +52,35 @@ impl ProviderHandler for GraphQLProvider {
                 )))
             }
         };
-        let mut instance = self.instance.write().await;
-        if *instance != database_url {
-            return Err(RpcError::InvalidParameter(format!(
-				"instance already initialised with a different {}, and we currently only support one connection",
-				DATABASE_URL_KEY
-			)));
+        let instance = self.database_url.read().await;
+        if let Some(existing) = &*instance {
+            if existing != database_url {
+                return Err(RpcError::InvalidParameter(format!(
+						"instance already initialised with a different {}, and we currently only support one connection",
+						DATABASE_URL_KEY
+					)));
+            }
         }
         let node_files = self.node_files.read().await;
+        let mut instance = self.database_url.write().await;
         if let Some(node_files) = &*node_files {
-            upstream::init("1", &node_files.path().to_string_lossy());
+            upstream::init(database_url, &node_files.path().to_string_lossy());
         }
-        *instance = database_url;
+        *instance = Some(database_url.to_string());
         Ok(true)
     }
 
     /// Handle notification that a link is dropped - release the upstream
     async fn delete_link(&self, _actor_id: &str) {
-        let mut instance = self.instance.write().await;
-        upstream::remove("1");
+        let mut instance = self.database_url.write().await;
+        upstream::remove();
         *instance = None;
     }
 
     /// Handle shutdown request by releasing upstream
     async fn shutdown(&self) -> Result<(), Infallible> {
-        let mut instance = self.instance.write().await;
-        upstream::remove("1");
+        let mut instance = self.database_url.write().await;
+        upstream::remove();
         *instance = None;
         let mut node_files = self.node_files.write().await;
         *node_files = None; // will remove temporary node files directory because TempDir is dropped
@@ -90,7 +93,7 @@ impl ProviderHandler for GraphQLProvider {
 impl GraphQL for GraphQLProvider {
     /// Execute the GraphQL query
     async fn query(&self, _ctx: &Context, req: &QueryRequest) -> RpcResult<QueryResponse> {
-        match upstream::query("1", &req.query) {
+        match upstream::query(&req.query) {
             QueryResult::Ok(result) => Ok(QueryResponse { data: result }),
             QueryResult::Err(err) => Err(RpcError::MethodNotHandled(err)),
         }

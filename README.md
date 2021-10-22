@@ -9,8 +9,10 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 - [x] correlate queries and responses
 - [x] Smithy interface
 - [x] wasmCloud provider
+- [x] package node modules in binary
+- [x] pass DATABASE_URL from link through to config
+- [ ] pass through example actor to demo functionality
 - [ ] tests
-- [ ] package node modules in binary
 
 ## Notes
 
