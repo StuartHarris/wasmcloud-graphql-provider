@@ -1,8 +1,8 @@
-use log::info;
 use std::str;
 use wasmbus_rpc::actor::prelude::*;
 use wasmcloud_graphql_interface::{GraphQL, GraphQLSender, QueryRequest};
 use wasmcloud_interface_httpserver::{HttpRequest, HttpResponse, HttpServer, HttpServerReceiver};
+use wasmcloud_interface_logging::info;
 
 #[derive(Debug, Default, Actor, HealthResponder)]
 #[services(Actor, HttpServer)]

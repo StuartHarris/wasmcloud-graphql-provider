@@ -1,0 +1,5 @@
+{
+  "query": "query MyQuery {\n  productLists {\n    nodes {\n      nodeId\n      userId\n      id\n      title\n    }\n  }\n}\n",
+  "variables": null,
+  "operationName": "MyQuery"
+}

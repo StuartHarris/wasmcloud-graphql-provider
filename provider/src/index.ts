@@ -17,11 +17,10 @@ let middleware: RequestHandler<
   Record<string, any>
 > & { graphqlRoute: string };
 let agent: request.SuperAgentTest;
+const app = express();
 
 export const init = (database: string) => {
   middleware = postgraphile(database, schemas, options);
-
-  const app = express();
   app.use(middleware);
   agent = request.agent(app);
 };
@@ -30,9 +29,13 @@ export const query = (query: string, cb: ICallback) => {
   agent
     .post(middleware.graphqlRoute)
     .set("Content-Type", "application/json")
-    .send({ query })
-    .expect(200)
-    .expect("Content-Type", /json/)
-    .then((res) => cb(null, res.text))
-    .catch(cb);
+    .send(query)
+    .then((res) => {
+      console.log({ res });
+      return cb(null, res?.text || "no response");
+    })
+    .catch((err) => {
+      console.log({ err });
+      return cb(err);
+    });
 };

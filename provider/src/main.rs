@@ -1,3 +1,4 @@
+use log::info;
 use std::{convert::Infallible, sync::Arc};
 use temp_dir::TempDir;
 use tokio::sync::RwLock;
@@ -52,21 +53,27 @@ impl ProviderHandler for GraphQLProvider {
                 )))
             }
         };
-        let instance = self.database_url.read().await;
-        if let Some(existing) = &*instance {
-            if existing != database_url {
-                return Err(RpcError::InvalidParameter(format!(
-						"instance already initialised with a different {}, and we currently only support one connection",
-						DATABASE_URL_KEY
-					)));
+        {
+            let instance = self.database_url.read().await;
+            if let Some(existing) = &*instance {
+                if existing != database_url {
+                    return Err(RpcError::InvalidParameter(format!(
+					"instance already initialised with a different {}, and we currently only support one connection",
+					DATABASE_URL_KEY
+				)));
+                }
             }
         }
-        let node_files = self.node_files.read().await;
-        let mut instance = self.database_url.write().await;
-        if let Some(node_files) = &*node_files {
-            upstream::init(database_url, &node_files.path().to_string_lossy());
+        {
+            let mut instance = self.database_url.write().await;
+            let node_files = self.node_files.read().await;
+            if let Some(node_files) = &*node_files {
+                let path = &node_files.path().to_string_lossy();
+                info!("initialize upstream");
+                upstream::init(database_url, path);
+            }
+            *instance = Some(database_url.to_string());
         }
-        *instance = Some(database_url.to_string());
         Ok(true)
     }
 
@@ -94,8 +101,14 @@ impl GraphQL for GraphQLProvider {
     /// Execute the GraphQL query
     async fn query(&self, _ctx: &Context, req: &QueryRequest) -> RpcResult<QueryResponse> {
         match upstream::query(&req.query) {
-            QueryResult::Ok(result) => Ok(QueryResponse { data: result }),
-            QueryResult::Err(err) => Err(RpcError::MethodNotHandled(err)),
+            QueryResult::Ok(result) => {
+                info!("result: {}", result);
+                Ok(QueryResponse { data: result })
+            }
+            QueryResult::Err(err) => {
+                info!("error: {}", err);
+                Err(RpcError::MethodNotHandled(err))
+            }
         }
     }
 }

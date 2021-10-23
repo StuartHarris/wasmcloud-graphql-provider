@@ -78,6 +78,15 @@ fn callback(mut cx: FunctionContext) -> JsResult<JsBox<QueryResult>> {
     return Ok(cx.boxed(QueryResult::Err("No value".to_string())));
 }
 
+pub fn remove() {
+    sync_node(move |mut cx| {
+        let undefined = cx.undefined();
+        cx.global().set(&mut cx, "mod", undefined)?;
+        Ok(())
+    })
+    .unwrap();
+}
+
 fn sync_node<T: Send + 'static>(
     f: impl FnOnce(TaskContext) -> NeonResult<T> + Send + 'static,
 ) -> Option<T> {
@@ -89,13 +98,4 @@ fn sync_node<T: Send + 'static>(
         Ok(())
     });
     rx.recv().ok()
-}
-
-pub fn remove() {
-    sync_node(move |mut cx| {
-        let undefined = cx.undefined();
-        cx.global().set(&mut cx, "mod", undefined)?;
-        Ok(())
-    })
-    .unwrap();
 }
