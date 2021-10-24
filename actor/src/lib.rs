@@ -16,7 +16,6 @@ impl HttpServer for PassThroughActor {
         ctx: &Context,
         req: &HttpRequest,
     ) -> std::result::Result<HttpResponse, RpcError> {
-        info!("{:?}", req);
         let query = str::from_utf8(&req.body)
             .map_err(|e| RpcError::Deser(format!("{}", e)))?
             .to_string();

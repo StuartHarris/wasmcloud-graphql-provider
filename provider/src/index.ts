@@ -31,11 +31,12 @@ export const query = (query: string, cb: ICallback) => {
     .set("Content-Type", "application/json")
     .send(query)
     .then((res) => {
-      console.log({ res });
-      return cb(null, res?.text || "no response");
+      let text = res.text;
+      console.log({ text });
+      cb(null, text);
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       console.log({ err });
-      return cb(err);
+      cb(err);
     });
 };

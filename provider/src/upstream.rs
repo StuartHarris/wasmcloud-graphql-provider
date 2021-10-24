@@ -1,14 +1,27 @@
+use log::info;
 use nodejs::neon::{
     context::{Context, FunctionContext, TaskContext},
     object::Object,
     prelude::Handle,
     reflect::eval,
     result::{JsResult, NeonResult},
-    types::{Finalize, JsBox, JsError, JsFunction, JsString, JsValue, Value},
+    types::{Finalize, JsFunction, JsNull, JsString, JsUndefined, JsValue, Value},
 };
-use std::sync::mpsc;
+use once_cell::sync::Lazy;
+use std::sync::{
+    mpsc::{self, Receiver, SyncSender},
+    Arc, Mutex,
+};
 
-#[derive(Clone)]
+static RESPONSES: Lazy<(
+    Arc<Mutex<SyncSender<QueryResult>>>,
+    Arc<Mutex<Receiver<QueryResult>>>,
+)> = Lazy::new(|| {
+    let (tx, rx) = mpsc::sync_channel::<QueryResult>(0);
+    (Arc::new(Mutex::new(tx)), Arc::new(Mutex::new(rx)))
+});
+
+#[derive(Clone, Debug)]
 pub enum QueryResult {
     Ok(String),
     Err(String),
@@ -45,37 +58,47 @@ pub fn init(database_url: &str, node_files: &str) {
 
 pub fn query(query: &str) -> QueryResult {
     let query = query.to_owned();
+
     sync_node(move |mut cx| {
         let script = cx.string("mod.query");
         let func: Handle<JsFunction> = eval(&mut cx, script)?.downcast_or_throw(&mut cx)?;
         let undefined = cx.undefined();
         let query: Handle<JsValue> = cx.string(query).upcast();
         let cb: Handle<JsValue> = JsFunction::new(&mut cx, callback)?.upcast();
-        let result = &**func
-            .call(&mut cx, undefined, vec![query, cb])?
-            .downcast_or_throw::<JsBox<QueryResult>, _>(&mut cx)?;
-        Ok(result.clone())
+        func.call(&mut cx, undefined, vec![query, cb])?;
+        Ok(())
     })
-    .unwrap()
+    .unwrap();
+
+    let rx = &RESPONSES.1.lock().unwrap();
+    let result = rx.recv().unwrap();
+    info!("result3: {:?}", result);
+    result
 }
 
-fn callback(mut cx: FunctionContext) -> JsResult<JsBox<QueryResult>> {
-    let err: Handle<JsValue> = cx.argument(0)?;
-    if err.is_a::<JsError, _>(&mut cx) {
-        let err = err
-            .downcast_or_throw::<JsError, _>(&mut cx)?
-            .to_string(&mut cx)?
-            .value(&mut cx);
-        return Ok(cx.boxed(QueryResult::Err(err)));
+fn callback(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    let error: Handle<JsValue> = cx.argument(0)?;
+    if !error.is_a::<JsNull, _>(&mut cx) {
+        let error = error.to_string(&mut cx)?.value(&mut cx);
+        let result = QueryResult::Err(error);
+        info!("result1: {:?}", result);
+        let tx = (*RESPONSES.0.lock().unwrap()).clone();
+        tx.send(result).unwrap();
+        return Ok(cx.undefined());
     }
     let res = cx.argument_opt(1);
-    if let Some(res) = res {
-        let ok = res
-            .downcast_or_throw::<JsString, _>(&mut cx)?
-            .value(&mut cx);
-        return Ok(cx.boxed(QueryResult::Ok(ok)));
-    }
-    return Ok(cx.boxed(QueryResult::Err("No value".to_string())));
+    let value = if let Some(res) = res {
+        res.downcast_or_throw::<JsString, _>(&mut cx)?
+            .value(&mut cx)
+    } else {
+        "".to_string()
+    };
+    info!("in callback");
+    let result = QueryResult::Ok(value);
+    info!("result2: {:?}", result);
+    let tx = (*RESPONSES.0.lock().unwrap()).clone();
+    tx.send(result).unwrap();
+    Ok(cx.undefined())
 }
 
 pub fn remove() {
