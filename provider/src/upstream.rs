@@ -1,4 +1,5 @@
-use log::info;
+use log::debug;
+use nanoid::nanoid;
 use nodejs::neon::{
     context::{Context, FunctionContext, TaskContext},
     object::Object,
@@ -8,18 +9,18 @@ use nodejs::neon::{
     types::{Finalize, JsFunction, JsNull, JsString, JsUndefined, JsValue, Value},
 };
 use once_cell::sync::Lazy;
-use std::sync::{
-    mpsc::{self, Receiver, SyncSender},
-    Arc, Mutex,
+use std::{
+    collections::HashMap,
+    sync::{
+        mpsc::{self, SyncSender},
+        Arc, Mutex,
+    },
 };
 
-static RESPONSES: Lazy<(
-    Arc<Mutex<SyncSender<QueryResult>>>,
-    Arc<Mutex<Receiver<QueryResult>>>,
-)> = Lazy::new(|| {
-    let (tx, rx) = mpsc::sync_channel::<QueryResult>(0);
-    (Arc::new(Mutex::new(tx)), Arc::new(Mutex::new(rx)))
-});
+type ResultSender = SyncSender<QueryResult>;
+
+static RESPONSES: Lazy<Arc<Mutex<HashMap<String, ResultSender>>>> =
+    Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
 
 #[derive(Clone, Debug)]
 pub enum QueryResult {
@@ -58,45 +59,55 @@ pub fn init(database_url: &str, node_files: &str) {
 
 pub fn query(query: &str) -> QueryResult {
     let query = query.to_owned();
-
+    let id = nanoid!();
+    debug!("id: {}, query: {:?}", id, query);
+    let (tx, rx) = mpsc::sync_channel::<QueryResult>(0);
+    {
+        let mut responses = RESPONSES.lock().unwrap();
+        responses.insert(id.clone(), tx);
+    }
+    let id2 = id.clone();
     sync_node(move |mut cx| {
         let script = cx.string("mod.query");
         let func: Handle<JsFunction> = eval(&mut cx, script)?.downcast_or_throw(&mut cx)?;
         let undefined = cx.undefined();
+        let id: Handle<JsValue> = cx.string(id2).upcast();
         let query: Handle<JsValue> = cx.string(query).upcast();
         let cb: Handle<JsValue> = JsFunction::new(&mut cx, callback)?.upcast();
-        func.call(&mut cx, undefined, vec![query, cb])?;
+        func.call(&mut cx, undefined, vec![id, query, cb])?;
         Ok(())
     })
     .unwrap();
 
-    let rx = &RESPONSES.1.lock().unwrap();
     let result = rx.recv().unwrap();
-    info!("result3: {:?}", result);
+    let mut responses = RESPONSES.lock().unwrap();
+    responses.remove(&id);
     result
 }
 
 fn callback(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let error: Handle<JsValue> = cx.argument(0)?;
+    let id = cx.argument::<JsString>(0)?.value(&mut cx);
+    let tx = {
+        let responses = RESPONSES.lock().unwrap();
+        responses.get(&id).unwrap().clone()
+    };
+    let error: Handle<JsValue> = cx.argument(1)?;
     if !error.is_a::<JsNull, _>(&mut cx) {
         let error = error.to_string(&mut cx)?.value(&mut cx);
         let result = QueryResult::Err(error);
-        info!("result1: {:?}", result);
-        let tx = (*RESPONSES.0.lock().unwrap()).clone();
+        debug!("id: {}, result: {:?}", id, result);
         tx.send(result).unwrap();
         return Ok(cx.undefined());
     }
-    let res = cx.argument_opt(1);
+    let res = cx.argument_opt(2);
     let value = if let Some(res) = res {
         res.downcast_or_throw::<JsString, _>(&mut cx)?
             .value(&mut cx)
     } else {
         "".to_string()
     };
-    info!("in callback");
     let result = QueryResult::Ok(value);
-    info!("result2: {:?}", result);
-    let tx = (*RESPONSES.0.lock().unwrap()).clone();
+    debug!("id: {}, result: {:?}", id, result);
     tx.send(result).unwrap();
     Ok(cx.undefined())
 }

@@ -6,7 +6,7 @@ import request from "supertest";
 import { options, schemas } from "./config";
 
 interface ICallback {
-  (error: Error | null, result?: string): void;
+  (id: string, error: Error | null, result?: string): void;
 }
 
 let middleware: RequestHandler<
@@ -25,7 +25,7 @@ export const init = (database: string) => {
   agent = request.agent(app);
 };
 
-export const query = (query: string, cb: ICallback) => {
+export const query = (id: string, query: string, cb: ICallback) => {
   agent
     .post(middleware.graphqlRoute)
     .set("Content-Type", "application/json")
@@ -33,10 +33,10 @@ export const query = (query: string, cb: ICallback) => {
     .then((res) => {
       let text = res.text;
       console.log({ text });
-      cb(null, text);
+      cb(id, null, text);
     })
     .catch((err: Error) => {
       console.log({ err });
-      cb(err);
+      cb(id, err);
     });
 };

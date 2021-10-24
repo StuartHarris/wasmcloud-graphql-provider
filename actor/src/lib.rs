@@ -19,7 +19,7 @@ impl HttpServer for PassThroughActor {
         let query = str::from_utf8(&req.body)
             .map_err(|e| RpcError::Deser(format!("{}", e)))?
             .to_string();
-        info!("{:?}", query);
+        info!("Received query: {:?}", query);
 
         let response = GraphQLSender::new()
             .query(
@@ -34,6 +34,5 @@ impl HttpServer for PassThroughActor {
             body: response.data.as_bytes().to_vec(),
             ..Default::default()
         })
-        // Ok(HttpResponse::default())
     }
 }

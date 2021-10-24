@@ -1353,6 +1353,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5ce46fe64a9d73be07dcbe690a38ce1b293be448fd8ce1e6c1b8062c9f72c6a"
 
 [[package]]
+name = "nanoid"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ffa00dec017b5b1a8b7cf5e2c008bfda1aa7e0697ac1508b491fdf2622fb4d8"
+dependencies = [
+ "rand 0.8.4",
+]
+
+[[package]]
 name = "napi-sys"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3118,6 +3127,7 @@ dependencies = [
  "futures 0.3.17",
  "hex",
  "log",
+ "nanoid",
  "nodejs",
  "once_cell",
  "sha-1 0.9.8",

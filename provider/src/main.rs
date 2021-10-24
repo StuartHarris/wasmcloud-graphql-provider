@@ -101,14 +101,8 @@ impl GraphQL for GraphQLProvider {
     /// Execute the GraphQL query
     async fn query(&self, _ctx: &Context, req: &QueryRequest) -> RpcResult<QueryResponse> {
         match upstream::query(&req.query) {
-            QueryResult::Ok(result) => {
-                info!("result: {}", result);
-                Ok(QueryResponse { data: result })
-            }
-            QueryResult::Err(err) => {
-                info!("error: {}", err);
-                Err(RpcError::MethodNotHandled(err))
-            }
+            QueryResult::Ok(result) => Ok(QueryResponse { data: result }),
+            QueryResult::Err(err) => Err(RpcError::MethodNotHandled(err)),
         }
     }
 }
