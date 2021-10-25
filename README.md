@@ -12,9 +12,8 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 - [x] package node modules in binary
 - [x] pass DATABASE_URL from link through to config
 - [x] pass through example actor to demo functionality
-- [ ] make provider methods to async
-- [ ] tests
+- [x] don't block async in handler
 
 ## Notes
 
-This is a work in progress and not suitable for use anywhere, yet.
+This is a work in progress and not suitable for use anywhere, yet. :-)
