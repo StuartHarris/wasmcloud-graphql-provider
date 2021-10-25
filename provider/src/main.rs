@@ -2,7 +2,6 @@ use log::info;
 use std::{convert::Infallible, sync::Arc};
 use temp_dir::TempDir;
 use tokio::{sync::RwLock, task};
-use upstream::QueryResult;
 use wasmbus_rpc::provider::prelude::*;
 use wasmcloud_graphql_interface::{GraphQL, GraphQLReceiver, QueryRequest, QueryResponse};
 
@@ -102,8 +101,8 @@ impl GraphQL for GraphQLProvider {
     async fn query(&self, _ctx: &Context, req: &QueryRequest) -> RpcResult<QueryResponse> {
         let query = req.query.clone();
         task::spawn_blocking(move || match upstream::query(&query) {
-            QueryResult::Ok(result) => Ok(QueryResponse { data: result }),
-            QueryResult::Err(err) => Err(RpcError::MethodNotHandled(err)),
+            Ok(result) => Ok(QueryResponse { data: result }),
+            Err(err) => Err(RpcError::MethodNotHandled(err.to_string())),
         })
         .await
         .map_err(|e| RpcError::Other(e.to_string()))?

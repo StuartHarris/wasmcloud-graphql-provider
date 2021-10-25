@@ -2,7 +2,7 @@ use std::str;
 use wasmbus_rpc::actor::prelude::*;
 use wasmcloud_graphql_interface::{GraphQL, GraphQLSender, QueryRequest};
 use wasmcloud_interface_httpserver::{HttpRequest, HttpResponse, HttpServer, HttpServerReceiver};
-use wasmcloud_interface_logging::info;
+use wasmcloud_interface_logging::debug;
 
 #[derive(Debug, Default, Actor, HealthResponder)]
 #[services(Actor, HttpServer)]
@@ -19,7 +19,7 @@ impl HttpServer for PassThroughActor {
         let query = str::from_utf8(&req.body)
             .map_err(|e| RpcError::Deser(format!("{}", e)))?
             .to_string();
-        info!("Received query: {:?}", query);
+        debug!("Received query: {:?}", query);
 
         let response = GraphQLSender::new()
             .query(

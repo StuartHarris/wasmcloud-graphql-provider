@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Result};
 use log::debug;
 use nanoid::nanoid;
 use nodejs::neon::{
@@ -22,11 +23,7 @@ type ResultSender = SyncSender<QueryResult>;
 static RESULTS_CHANNEL: Lazy<Arc<Mutex<HashMap<String, ResultSender>>>> =
     Lazy::new(|| Arc::new(Mutex::new(HashMap::new())));
 
-#[derive(Clone, Debug)]
-pub enum QueryResult {
-    Ok(String),
-    Err(String),
-}
+pub type QueryResult = Result<String>;
 
 /// load the PostGraphile middleware into node
 /// - todo: work out if we can have isolated instances
@@ -97,7 +94,7 @@ fn callback(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let error: Handle<JsValue> = cx.argument(1)?;
     if !error.is_a::<JsNull, _>(&mut cx) {
         let error = error.to_string(&mut cx)?.value(&mut cx);
-        let result = QueryResult::Err(error);
+        let result = Err(anyhow!(error));
         debug!("id: {}, result: {:?}", id, result);
         tx.send(result).unwrap();
         return Ok(cx.undefined());
@@ -111,7 +108,7 @@ fn callback(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     } else {
         "".to_string()
     };
-    let result = QueryResult::Ok(value);
+    let result = Ok(value);
     debug!("id: {}, result: {:?}", id, result);
     tx.send(result).unwrap();
 

@@ -31,12 +31,9 @@ export const query = (id: string, query: string, cb: ICallback) => {
     .set("Content-Type", "application/json")
     .send(query)
     .then((res) => {
-      let text = res.text;
-      console.log({ text });
-      cb(id, null, text);
+      cb(id, null, res.text);
     })
     .catch((err: Error) => {
-      console.log({ err });
       cb(id, err);
     });
 };
