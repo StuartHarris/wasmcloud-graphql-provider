@@ -55,7 +55,6 @@ pub fn init(database_url: &str, node_files: &str) {
     .unwrap();
 }
 
-// todo: make async
 pub fn query(query: &str) -> QueryResult {
     let query = query.to_owned();
     let id = nanoid!();
