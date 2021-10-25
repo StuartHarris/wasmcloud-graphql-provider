@@ -99,8 +99,8 @@ impl ProviderHandler for GraphQLProvider {
 impl GraphQL for GraphQLProvider {
     /// Execute the GraphQL query
     async fn query(&self, _ctx: &Context, req: &QueryRequest) -> RpcResult<QueryResponse> {
-        let query = req.query.clone();
-        task::spawn_blocking(move || match upstream::query(&query) {
+        let req = req.clone();
+        task::spawn_blocking(move || match upstream::query(req) {
             Ok(result) => Ok(QueryResponse { data: result }),
             Err(err) => Err(RpcError::MethodNotHandled(err.to_string())),
         })

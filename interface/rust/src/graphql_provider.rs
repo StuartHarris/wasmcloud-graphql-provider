@@ -12,14 +12,18 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
+/// map data structure for holding http headers
+///
+pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
+
+pub type HeaderValues = Vec<String>;
+
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct QueryRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub headers: Option<String>,
+    pub headers: Option<HeaderMap>,
     #[serde(default)]
     pub query: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub variables: Option<String>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]

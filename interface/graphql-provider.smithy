@@ -28,12 +28,21 @@ structure QueryRequest {
   @required
   query: String,
 
-  variables: String,
-
-  headers: String
+  headers: HeaderMap
 }
 
 structure QueryResponse {
   @required
   data: String
+}
+
+/// map data structure for holding http headers
+///
+map HeaderMap {
+    key: String,
+    value: HeaderValues,
+}
+
+list HeaderValues {
+    member: String
 }

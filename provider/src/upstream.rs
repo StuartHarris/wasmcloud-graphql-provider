@@ -17,6 +17,7 @@ use std::{
         Arc, Mutex,
     },
 };
+use wasmcloud_graphql_interface::QueryRequest;
 
 type ResultSender = SyncSender<QueryResult>;
 
@@ -52,10 +53,9 @@ pub fn init(database_url: &str, node_files: &str) {
     .unwrap();
 }
 
-pub fn query(query: &str) -> QueryResult {
-    let query = query.to_owned();
+pub fn query(request: QueryRequest) -> QueryResult {
     let id = nanoid!();
-    debug!("id: {}, query: {:?}", id, query);
+    debug!("id: {}, query: {:?}", id, request);
     let (tx, rx) = mpsc::sync_channel::<QueryResult>(0);
     {
         let mut results_channel = RESULTS_CHANNEL.lock().unwrap();
@@ -69,9 +69,17 @@ pub fn query(query: &str) -> QueryResult {
         let func: Handle<JsFunction> = eval(&mut cx, script)?.downcast_or_throw(&mut cx)?;
         let undefined = cx.undefined();
         let id: Handle<JsValue> = cx.string(id2).upcast();
-        let query: Handle<JsValue> = cx.string(query).upcast();
+        let query: Handle<JsValue> = cx.string(request.query).upcast();
+
+        let headers = cx.empty_object();
+        if let Some(headers_in) = request.headers {
+            for header in headers_in.iter() {
+                let val = cx.string(header.1.join(","));
+                headers.set(&mut cx, header.0.as_str(), val)?;
+            }
+        }
         let cb: Handle<JsValue> = JsFunction::new(&mut cx, callback)?.upcast();
-        func.call(&mut cx, undefined, vec![id, query, cb])?;
+        func.call(&mut cx, undefined, vec![id, query, headers.upcast(), cb])?;
         Ok(())
     })
     .unwrap();

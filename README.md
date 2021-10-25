@@ -13,6 +13,7 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 - [x] pass DATABASE_URL from link through to config
 - [x] pass through example actor to demo functionality
 - [x] don't block async in handler
+- [x] pass HTTP headers through
 
 ## Notes
 

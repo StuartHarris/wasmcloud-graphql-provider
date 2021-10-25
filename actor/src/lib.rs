@@ -21,14 +21,13 @@ impl HttpServer for PassThroughActor {
             .to_string();
         debug!("Received query: {:?}", query);
 
+        let headers = if !req.header.is_empty() {
+            Some(req.header.clone())
+        } else {
+            None
+        };
         let response = GraphQLSender::new()
-            .query(
-                ctx,
-                &QueryRequest {
-                    query,
-                    ..Default::default()
-                },
-            )
+            .query(ctx, &QueryRequest { query, headers })
             .await?;
         Ok(HttpResponse {
             body: response.data.as_bytes().to_vec(),

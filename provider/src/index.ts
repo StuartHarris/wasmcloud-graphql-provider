@@ -25,9 +25,16 @@ export const init = (database: string) => {
   agent = request.agent(app);
 };
 
-export const query = (id: string, query: string, cb: ICallback) => {
+export const query = (
+  id: string,
+  query: string,
+  headers: Record<string, any>,
+  cb: ICallback
+) => {
+  console.log({ query });
   agent
     .post(middleware.graphqlRoute)
+    .set(headers)
     .set("Content-Type", "application/json")
     .send(query)
     .then((res) => {
