@@ -15,12 +15,17 @@ use org.wasmcloud.model#wasmbus
 )
 service GraphQL {
   version: "0.1",
-  operations: [ Query ]
+  operations: [ Query, Graphiql ]
 }
 
 @readonly
 operation Query { 
   input: QueryRequest,
+  output: QueryResponse
+}
+
+@readonly
+operation Graphiql { 
   output: QueryResponse
 }
 

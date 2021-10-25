@@ -25,8 +25,8 @@ export const options: PostGraphileOptions = {
     };
   },
   watchPg: true,
-  graphiql: false,
-  enhanceGraphiql: false,
+  graphiql: true,
+  enhanceGraphiql: true,
   subscriptions: false,
   dynamicJson: true,
   setofFunctionsContainNulls: false,

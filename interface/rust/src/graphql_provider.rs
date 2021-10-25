@@ -41,6 +41,7 @@ pub trait GraphQL {
         "stuart-harris:graphql-provider"
     }
     async fn query(&self, ctx: &Context, arg: &QueryRequest) -> RpcResult<QueryResponse>;
+    async fn graphiql(&self, ctx: &Context) -> RpcResult<QueryResponse>;
 }
 
 /// GraphQLReceiver receives messages defined in the GraphQL service trait
@@ -56,6 +57,14 @@ pub trait GraphQLReceiver: MessageDispatch + GraphQL {
                 let buf = serialize(&resp)?;
                 Ok(Message {
                     method: "GraphQL.Query",
+                    arg: Cow::Owned(buf),
+                })
+            }
+            "Graphiql" => {
+                let resp = GraphQL::graphiql(self, ctx).await?;
+                let buf = serialize(&resp)?;
+                Ok(Message {
+                    method: "GraphQL.Graphiql",
                     arg: Cow::Owned(buf),
                 })
             }
@@ -126,6 +135,24 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> GraphQL for GraphQLSe
             .await?;
         let value = deserialize(&resp)
             .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Query", e)))?;
+        Ok(value)
+    }
+    #[allow(unused)]
+    async fn graphiql(&self, ctx: &Context) -> RpcResult<QueryResponse> {
+        let buf = *b"";
+        let resp = self
+            .transport
+            .send(
+                ctx,
+                Message {
+                    method: "GraphQL.Graphiql",
+                    arg: Cow::Borrowed(&buf),
+                },
+                None,
+            )
+            .await?;
+        let value = deserialize(&resp)
+            .map_err(|e| RpcError::Deser(format!("response to {}: {}", "Graphiql", e)))?;
         Ok(value)
     }
 }

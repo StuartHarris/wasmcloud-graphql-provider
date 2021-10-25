@@ -107,4 +107,14 @@ impl GraphQL for GraphQLProvider {
         .await
         .map_err(|e| RpcError::Other(e.to_string()))?
     }
+
+    /// Get Graphiql UI
+    async fn graphiql(&self, _ctx: &Context) -> RpcResult<QueryResponse> {
+        task::spawn_blocking(move || match upstream::graphiql() {
+            Ok(result) => Ok(QueryResponse { data: result }),
+            Err(err) => Err(RpcError::MethodNotHandled(err.to_string())),
+        })
+        .await
+        .map_err(|e| RpcError::Other(e.to_string()))?
+    }
 }

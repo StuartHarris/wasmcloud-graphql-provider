@@ -91,6 +91,36 @@ pub fn query(request: QueryRequest) -> QueryResult {
     result
 }
 
+pub fn graphiql() -> QueryResult {
+    let id = nanoid!();
+    debug!("id: {}", id);
+    let (tx, rx) = mpsc::sync_channel::<QueryResult>(0);
+    {
+        let mut results_channel = RESULTS_CHANNEL.lock().unwrap();
+        results_channel.insert(id.clone(), tx);
+    }
+
+    // fetch the graphiql UI
+    let id2 = id.clone();
+    sync_node(move |mut cx| {
+        let script = cx.string("mod.graphiql");
+        let func: Handle<JsFunction> = eval(&mut cx, script)?.downcast_or_throw(&mut cx)?;
+        let undefined = cx.undefined();
+        let id: Handle<JsValue> = cx.string(id2).upcast();
+
+        let cb: Handle<JsValue> = JsFunction::new(&mut cx, callback)?.upcast();
+        func.call(&mut cx, undefined, vec![id, cb])?;
+        Ok(())
+    })
+    .unwrap();
+
+    // wait for the result
+    let result = rx.recv().unwrap();
+    let mut results_channel = RESULTS_CHANNEL.lock().unwrap();
+    results_channel.remove(&id);
+    result
+}
+
 fn callback(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let id = cx.argument::<JsString>(0)?.value(&mut cx);
     let tx = {

@@ -15,7 +15,7 @@ let middleware: RequestHandler<
   any,
   ParsedQs,
   Record<string, any>
-> & { graphqlRoute: string };
+> & { graphqlRoute: string; graphiqlRoute: string };
 let agent: request.SuperAgentTest;
 const app = express();
 
@@ -31,12 +31,23 @@ export const query = (
   headers: Record<string, any>,
   cb: ICallback
 ) => {
-  console.log({ query });
   agent
     .post(middleware.graphqlRoute)
     .set(headers)
     .set("Content-Type", "application/json")
     .send(query)
+    .then((res) => {
+      cb(id, null, res.text);
+    })
+    .catch((err: Error) => {
+      cb(id, err);
+    });
+};
+
+export const graphiql = (id: string, cb: ICallback) => {
+  agent
+    .get(middleware.graphiqlRoute)
+    .set("Content-Type", "text/html")
     .then((res) => {
       cb(id, null, res.text);
     })
