@@ -1,10 +1,14 @@
-// This file is generated automatically using wasmcloud/weld-codegen and smithy model definitions
+// This file is generated automatically using wasmcloud-weld and smithy model definitions
 //
 
-#![allow(unused_imports, clippy::ptr_arg, clippy::needless_lifetimes)]
+#![allow(clippy::ptr_arg)]
+#[allow(unused_imports)]
 use async_trait::async_trait;
+#[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, io::Write, string::ToString};
+#[allow(unused_imports)]
+use std::{borrow::Cow, string::ToString};
+#[allow(unused_imports)]
 use wasmbus_rpc::{
     deserialize, serialize, Context, Message, MessageDispatch, RpcError, RpcResult, SendOpts,
     Timestamp, Transport,
@@ -54,18 +58,18 @@ pub trait GraphQLReceiver: MessageDispatch + GraphQL {
                 let value: QueryRequest = deserialize(message.arg.as_ref())
                     .map_err(|e| RpcError::Deser(format!("message '{}': {}", message.method, e)))?;
                 let resp = GraphQL::query(self, ctx, &value).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "GraphQL.Query",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             "Graphiql" => {
                 let resp = GraphQL::graphiql(self, ctx).await?;
-                let buf = serialize(&resp)?;
+                let buf = Cow::Owned(serialize(&resp)?);
                 Ok(Message {
                     method: "GraphQL.Graphiql",
-                    arg: Cow::Owned(buf),
+                    arg: buf,
                 })
             }
             _ => Err(RpcError::MethodNotHandled(format!(
@@ -87,10 +91,6 @@ impl<T: Transport> GraphQLSender<T> {
     /// Constructs a GraphQLSender with the specified transport
     pub fn via(transport: T) -> Self {
         Self { transport }
-    }
-
-    pub fn set_timeout(&self, interval: std::time::Duration) {
-        self.transport.set_timeout(interval);
     }
 }
 
@@ -121,14 +121,14 @@ impl GraphQLSender<wasmbus_rpc::actor::prelude::WasmHost> {
 impl<T: Transport + std::marker::Sync + std::marker::Send> GraphQL for GraphQLSender<T> {
     #[allow(unused)]
     async fn query(&self, ctx: &Context, arg: &QueryRequest) -> RpcResult<QueryResponse> {
-        let buf = serialize(arg)?;
+        let arg = serialize(arg)?;
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "GraphQL.Query",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
@@ -139,14 +139,14 @@ impl<T: Transport + std::marker::Sync + std::marker::Send> GraphQL for GraphQLSe
     }
     #[allow(unused)]
     async fn graphiql(&self, ctx: &Context) -> RpcResult<QueryResponse> {
-        let buf = *b"";
+        let arg = *b"";
         let resp = self
             .transport
             .send(
                 ctx,
                 Message {
                     method: "GraphQL.Graphiql",
-                    arg: Cow::Borrowed(&buf),
+                    arg: Cow::Borrowed(&arg),
                 },
                 None,
             )
