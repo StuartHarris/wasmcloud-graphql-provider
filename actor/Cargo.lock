@@ -574,9 +574,9 @@ dependencies = [
 
 [[package]]
 name = "directories"
-version = "3.0.2"
+version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e69600ff1703123957937708eb27f7a564e48885c537782722ed0ba3189ce1d7"
+checksum = "f51c5d4ddabd36886dd3e1438cb358cdcb0d7c499cb99cb4ac2e38e18b5cb210"
 dependencies = [
  "dirs-sys",
 ]
@@ -935,6 +935,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "half"
+version = "1.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
+
+[[package]]
 name = "handlebars"
 version = "4.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1201,6 +1207,27 @@ name = "mime"
 version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
+
+[[package]]
+name = "minicbor"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9761df552087b47d7651dd4d14717c35ef43d47c01e04e399530faaa427ca541"
+dependencies = [
+ "half",
+ "minicbor-derive",
+]
+
+[[package]]
+name = "minicbor-derive"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "355264ec26c23aae1d8d4599356cbd7e84134182b8feb9573acbd6d68c09c73e"
+dependencies = [
+ "proc-macro2 1.0.30",
+ "quote 1.0.10",
+ "syn 1.0.80",
+]
 
 [[package]]
 name = "miniz_oxide"
@@ -2779,9 +2806,9 @@ dependencies = [
 
 [[package]]
 name = "wasmbus-rpc"
-version = "0.4.4"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3242159c8e62fb93b5de695f6b84f52d346c8583aed6d68538f20c38c65518da"
+checksum = "8875f45e1c7a1b75a0a9dc66a570524ead1b298f9919ec3b7a768941974e4524"
 dependencies = [
  "async-trait",
  "base64",
@@ -2791,6 +2818,7 @@ dependencies = [
  "data-encoding",
  "futures 0.3.17",
  "log",
+ "minicbor",
  "nats",
  "once_cell",
  "pin-utils",
@@ -2825,9 +2853,9 @@ dependencies = [
 
 [[package]]
 name = "wasmcloud-interface-httpserver"
-version = "0.1.11"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5d3c3ea1b7ef95df5928c9eaaf6c6bff194aec074b5555643c5e13906a624b2"
+checksum = "09cde70347ba62aa804f2704e4220437be0a73326b95e97cce2b7d90a53ac0f3"
 dependencies = [
  "async-trait",
  "serde",
@@ -2839,9 +2867,9 @@ dependencies = [
 
 [[package]]
 name = "wasmcloud-interface-logging"
-version = "0.1.4"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d0f1742be67cef6dab78b1b555a8e87a613f3079cdce4124dfa5d0fd99f7f8a"
+checksum = "da3f46d0563f6a9a5d7bfaa03eab1359760696f6737d2587d9da4ce405f8acc8"
 dependencies = [
  "async-trait",
  "cfg-if 1.0.0",
@@ -2875,9 +2903,9 @@ dependencies = [
 
 [[package]]
 name = "weld-codegen"
-version = "0.1.18"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae17c832db339500d1de2420c545efa6f6121caac9c86c4884fb7c70abe2285d"
+checksum = "ad4b02d834c2a2d6a8c045d1325269942850309fa3af8037935e37db9d49f7bc"
 dependencies = [
  "Inflector",
  "atelier_assembler",
@@ -2891,6 +2919,7 @@ dependencies = [
  "handlebars",
  "lazy_static",
  "lexical-sort",
+ "minicbor",
  "reqwest",
  "rustc-hash",
  "serde",

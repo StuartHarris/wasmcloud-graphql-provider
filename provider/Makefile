@@ -7,16 +7,9 @@ REVISION = 0
 
 .PHONY: default
 default:
-	yarn && yarn build
-	yarn --production
-	mkdir -p build
-	tar -czf build/build.tgz node_modules dist
-	cargo run
-
-.PHONY: clean
-clean:
-	rm -rf ./dist ./build
-	cargo clean
+	$(MAKE) build
+	$(MAKE) par
+	$(MAKE) push
 
 .PHONY: build
 build:
@@ -25,6 +18,14 @@ build:
 	mkdir -p build
 	tar -czf build/build.tgz node_modules dist
 	cargo build --release
+
+.PHONY: clean
+clean:
+	rm -rf ./dist ./build
+	cargo clean
+
+.PHONY: par
+par:
 	wash par create \
 		--arch x86_64-macos \
 		--binary target/release/$(PROJECT) \
@@ -36,3 +37,7 @@ build:
 		--destination build/$(PROJECT).par.gz \
 		--compress
 	wash par inspect build/$(PROJECT).par.gz
+
+.PHONY: push
+push:
+	wash reg push --insecure localhost:5000/$(PROJECT):$(VERSION) build/$(PROJECT).par.gz
