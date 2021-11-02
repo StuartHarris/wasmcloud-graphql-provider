@@ -101,7 +101,7 @@ impl GraphQL for GraphQLProvider {
     async fn query(&self, _ctx: &Context, req: &QueryRequest) -> RpcResult<QueryResponse> {
         let req = req.clone();
         task::spawn_blocking(move || match upstream::query(req) {
-            Ok(result) => Ok(QueryResponse { data: result }),
+            Ok(data) => Ok(QueryResponse { data }),
             Err(err) => Err(RpcError::MethodNotHandled(err.to_string())),
         })
         .await
@@ -111,7 +111,7 @@ impl GraphQL for GraphQLProvider {
     /// Get Graphiql UI
     async fn graphiql(&self, _ctx: &Context) -> RpcResult<QueryResponse> {
         task::spawn_blocking(move || match upstream::graphiql() {
-            Ok(result) => Ok(QueryResponse { data: result }),
+            Ok(data) => Ok(QueryResponse { data }),
             Err(err) => Err(RpcError::MethodNotHandled(err.to_string())),
         })
         .await
