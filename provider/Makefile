@@ -1,9 +1,10 @@
-CAPABILITY_ID = "stuart-harris:graphql-provider"
-NAME = "wasmcloud-graphql-provider"
-VENDOR = "StuartHarris"
+CAPABILITY_ID = stuart-harris:graphql-provider
+NAME = wasmcloud-graphql-provider
+VENDOR = StuartHarris
 PROJECT = wasmcloud-graphql-provider
 VERSION = 0.1.0
 REVISION = 0
+ARCHITECTURE = x86_64-linux
 
 .PHONY: default
 default:
@@ -27,7 +28,7 @@ clean:
 .PHONY: par
 par:
 	wash par create \
-		--arch x86_64-macos \
+		--arch $(ARCHITECTURE) \
 		--binary target/release/$(PROJECT) \
 		--capid $(CAPABILITY_ID) \
 		--name $(NAME) \
@@ -40,4 +41,4 @@ par:
 
 .PHONY: push
 push:
-	wash reg push --insecure localhost:5000/$(PROJECT):$(VERSION) build/$(PROJECT).par.gz
+	wash reg push --insecure registry:5001/$(PROJECT):$(VERSION) build/$(PROJECT).par.gz

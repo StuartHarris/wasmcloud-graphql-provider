@@ -2,13 +2,13 @@
 set -eux -o pipefail
 
 ACTOR_ID=MA5PVZ6QNJK5TELQHPQGICJJ2EFVH7YDVXKF2NCUTYGSVVHUCEOL5UW6
-ACTOR_REF=localhost:5000/v2/pass_through:0.1.0
+ACTOR_REF=registry:5001/v2/pass_through:0.1.0
 HTTPSERVER_CONFIG=http_config.json
 HTTPSERVER_ID=VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M
 HTTPSERVER_REF=wasmcloud.azurecr.io/httpserver:0.14.4
 PROVIDER_CONTRACT=stuart-harris:graphql-provider
 PROVIDER_ID=VAH3FDYDTRSPMDDHSO4TK6YOKXHZLFQ5QIT4TM4USZ4GKBU2BTJ2JIP5
-PROVIDER_REF=localhost:5000/wasmcloud-graphql-provider:0.1.0
+PROVIDER_REF=registry:5001/wasmcloud-graphql-provider:0.1.0
 
 # command to base64 encode stdin to stdout
 BASE64_ENC=base64
