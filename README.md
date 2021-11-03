@@ -6,9 +6,13 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 
 ## Notes
 
+This is a work in progress and not suitable for use anywhere, yet. :-)
+
 The pass-through actor is for demo purposes only — you might instead just consume the GraphQL in your actors, rather than exposing it directly to a browser client.
 
-There are some outstanding problems. I haven't built it for wasmCloud hosted in Docker, as that uses Debian Buster, and I think we need Bullseye for the required glibc version (>=2.9). It currently works on wasmCloud hosted on MacOS, but there are problems that surface when large payloads (like an introspection query) are requested (in addition to the default 1MB limit on NATS).
+There may be some an outstanding problem that surfaces when large payloads (like an introspection query) are requested (in addition to the default 1MB limit on NATS).
+
+There is a dev container configuration in the project to build the provider for linux (e.g. if you're on a Mac).
 
 ## Todo
 
@@ -22,7 +26,3 @@ There are some outstanding problems. I haven't built it for wasmCloud hosted in 
 - [x] pass through example actor to demo functionality
 - [x] don't block async in handler
 - [x] pass HTTP headers through
-
-## Notes
-
-This is a work in progress and not suitable for use anywhere, yet. :-)
