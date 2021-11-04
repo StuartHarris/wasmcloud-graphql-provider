@@ -21,6 +21,10 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
    # install `zx` to run scripts
    npm install -g zx
 
+   # create a .env file with the database url, e.g.
+   echo `DATABASE_URL=postgresql://postgres:changeme@localhost:5432/todos` >.env
+
+
    # bring everything up
    cd automation
    ./up.mjs
