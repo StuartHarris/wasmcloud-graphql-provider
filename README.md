@@ -6,10 +6,15 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 
 ## Getting started
 
-1. build and sign everything
+1. build and sign everything. If you're on MacOS, you may need to build the provider for Linux by running the provider's `make` in the dev container — for vscode, run (`cmd-shift-P`) `@command:remote-containers.reopenInContainer`.
 
    ```sh
    make
+
+   # or
+   (cd interface && make)
+   (cd actor && make)
+   (cd provider && make)
    ```
 
 1. run up a system (postgres DB, pgAdmin, OCI registry, NATS, wasmCloud)
@@ -41,13 +46,17 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
    ```graphql
    query get_all {
      todos {
-       nodes {
-         id
-         nodeId
-         content
-         createdAt
-         updatedAt
-         completedAt
+       totalCount
+       edges {
+         cursor
+         node {
+           id
+           nodeId
+           content
+           createdAt
+           updatedAt
+           completedAt
+         }
        }
      }
    }
