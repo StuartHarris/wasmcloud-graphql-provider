@@ -1,0 +1,4 @@
+{
+  "query": "query get_all { todos { nodes { id nodeId content createdAt updatedAt completedAt } } } ",
+  "variables": null
+}

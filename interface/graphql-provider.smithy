@@ -41,8 +41,6 @@ structure QueryResponse {
   data: String
 }
 
-/// map data structure for holding http headers
-///
 map HeaderMap {
     key: String,
     value: HeaderValues,

@@ -1,0 +1,64 @@
+version: "3.5"
+
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    restart: unless-stopped
+
+  nats:
+    image: nats:2.6.3
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    command: ["-js"]
+    restart: unless-stopped
+
+  registry:
+    image: registry:2.7
+    ports:
+      - "5001:5001"
+    environment:
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5001
+    restart: unless-stopped
+
+  wasmcloud:
+    image: wasmcloud/wasmcloud_host:latest
+    environment:
+      LC_ALL: en_US.UTF-8
+      WASMCLOUD_OCI_ALLOWED_INSECURE: registry:5001
+      WASMCLOUD_RPC_HOST: nats
+      WASMCLOUD_CTL_HOST: nats
+      WASMCLOUD_PROV_RPC_HOST: nats
+      # WASMCLOUD_CLUSTER_SEED: ${WASMCLOUD_CLUSTER_SEED}
+    ports:
+      - "127.0.0.1:4000:4000" # washboard
+      - "127.0.0.1:443:8443" # httpserver HTTPS port
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres:
+  pgadmin:

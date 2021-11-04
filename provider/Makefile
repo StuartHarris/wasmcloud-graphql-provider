@@ -10,7 +10,6 @@ ARCHITECTURE = x86_64-linux
 default:
 	$(MAKE) build
 	$(MAKE) par
-	$(MAKE) push
 
 .PHONY: build
 build:
