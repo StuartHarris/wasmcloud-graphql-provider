@@ -28,6 +28,7 @@ services:
     restart: unless-stopped
 
   nats:
+    container_name: nats_container
     image: nats:2.6.3
     ports:
       - "4222:4222"
@@ -37,6 +38,7 @@ services:
     restart: unless-stopped
 
   registry:
+    container_name: registry_container
     image: registry:2.7
     ports:
       - "5001:5001"
@@ -45,6 +47,7 @@ services:
     restart: unless-stopped
 
   wasmcloud:
+    container_name: wasmcloud_container
     image: wasmcloud/wasmcloud_host:latest
     environment:
       LC_ALL: en_US.UTF-8

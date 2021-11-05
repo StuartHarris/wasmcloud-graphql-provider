@@ -8,7 +8,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE TABLE todos (
+CREATE TABLE IF NOT EXISTS todos (
     id serial NOT NULL PRIMARY KEY,
     content text,
     created_at timestamptz NOT NULL DEFAULT NOW(),
@@ -16,7 +16,8 @@ CREATE TABLE todos (
     completed_at timestamptz
 );
 
-CREATE TRIGGER set_timestamp
-    BEFORE UPDATE ON todos
-    FOR EACH ROW
-    EXECUTE PROCEDURE trigger_set_timestamp ();
+CREATE OR REPLACE TRIGGER set_timestamp BEFORE UPDATE ON todos FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp ();
+
+COMMENT ON TABLE _sqlx_migrations IS E'@omit';
+
+CREATE INDEX IF NOT EXISTS "todos_completed" ON "public"."todos" ("completed_at");

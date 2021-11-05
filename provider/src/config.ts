@@ -8,7 +8,21 @@ export const schemas: string | string[] = ["public"];
 
 // PostGraphile options; see https://www.graphile.org/postgraphile/usage-library/#api-postgraphilepgconfig-schemaname-options
 export const options: PostGraphileOptions = {
+  allowExplain: false,
   appendPlugins: [inflector, manyToMany, filter],
+  dynamicJson: true,
+  enableQueryBatching: true,
+  enhanceGraphiql: true,
+  extendedErrors: ["hint", "detail", "errcode"],
+  graphiql: true,
+  ignoreIndexes: false,
+  ignoreRBAC: false,
+  legacyRelations: "omit",
+  setofFunctionsContainNulls: false,
+  showErrorStack: "json",
+  sortExport: true,
+  subscriptions: false,
+  watchPg: true,
   pgSettings(req) {
     // Adding this to ensure that all servers pass through the request in a
     // good enough way that we can extract headers.
@@ -24,17 +38,4 @@ export const options: PostGraphileOptions = {
         (req as any).normalizedConnectionParams?.["x-user-id"],
     };
   },
-  watchPg: true,
-  graphiql: true,
-  enhanceGraphiql: true,
-  subscriptions: false,
-  dynamicJson: true,
-  setofFunctionsContainNulls: false,
-  ignoreRBAC: false,
-  ignoreIndexes: false,
-  showErrorStack: "json",
-  extendedErrors: ["hint", "detail", "errcode"],
-  allowExplain: false,
-  legacyRelations: "omit",
-  sortExport: true,
 };

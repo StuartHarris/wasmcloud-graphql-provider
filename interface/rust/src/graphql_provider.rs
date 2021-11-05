@@ -12,8 +12,6 @@ use wasmbus_rpc::{
 
 pub const SMITHY_VERSION: &str = "1.0";
 
-/// map data structure for holding http headers
-///
 pub type HeaderMap = std::collections::HashMap<String, HeaderValues>;
 
 pub type HeaderValues = Vec<String>;

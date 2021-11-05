@@ -1,7 +1,5 @@
 import express from "express";
-import { ParamsDictionary, RequestHandler } from "express-serve-static-core";
 import { postgraphile } from "postgraphile";
-import { ParsedQs } from "qs";
 import request from "supertest";
 import { options, schemas } from "./config";
 
@@ -9,20 +7,18 @@ interface ICallback {
   (id: string, error: Error | null, result?: string): void;
 }
 
-let middleware: RequestHandler<
-  ParamsDictionary,
-  { text: string },
-  any,
-  ParsedQs,
-  Record<string, any>
-> & { graphqlRoute: string; graphiqlRoute: string };
 let agent: request.SuperAgentTest;
-const app = express();
+let graphqlRoute: string;
+let graphiqlRoute: string;
 
 export const init = (database: string) => {
-  middleware = postgraphile(database, schemas, options);
+  const app = express();
+  const middleware = postgraphile(database, schemas, options);
   app.use(middleware);
+
   agent = request.agent(app);
+  graphqlRoute = middleware.graphqlRoute;
+  graphiqlRoute = middleware.graphiqlRoute;
 };
 
 export const query = (
@@ -32,7 +28,7 @@ export const query = (
   cb: ICallback
 ) => {
   agent
-    .post(middleware.graphqlRoute)
+    .post(graphqlRoute)
     .set(headers)
     .set("Content-Type", "application/json")
     .send(query)
@@ -46,7 +42,7 @@ export const query = (
 
 export const graphiql = (id: string, cb: ICallback) => {
   agent
-    .get(middleware.graphiqlRoute)
+    .get(graphiqlRoute)
     .set("Content-Type", "text/html")
     .then((res) => {
       cb(id, null, res.text);
