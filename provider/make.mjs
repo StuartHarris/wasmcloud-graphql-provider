@@ -1,6 +1,8 @@
 #!/usr/bin/env zx
 
 $.verbose = false;
+process.env.CARGO_TERM_COLOR = "always";
+process.env.FORCE_COLOR = "3";
 
 const capability = "stuart-harris:graphql-provider";
 const registry = "registry:5001";
@@ -23,13 +25,13 @@ const arch = `${architectures[os.arch()]}-${operating_systems[os.platform()]}`;
 $.verbose = true;
 
 if (argv.clean) {
-  console.log(chalk.blueBright.bold("Cleaning..."));
+  step("Cleaning...");
   await $`cargo clean`;
   await $`rm -rf build dist`;
 }
 
 if (argv.build) {
-  console.log(chalk.blueBright.bold("Building..."));
+  step("Building...");
   await $`yarn`;
   await $`yarn build`;
   await $`yarn --production`;
@@ -43,7 +45,7 @@ const source = `target/${build}/${project}`;
 const destination = `build/${project}.par.gz`;
 
 if (argv.package) {
-  console.log(chalk.blueBright.bold("Packaging..."));
+  step("Packaging...");
   await $`mkdir -p build`;
 
   await $`wash par create ${[
@@ -69,6 +71,10 @@ if (argv.package) {
 }
 
 if (argv.push) {
-  console.log(chalk.blueBright.bold("Pushing..."));
+  step("Pushing...");
   await $`wash reg push --insecure ${registry}/${project}:${version} ${destination}`;
+}
+
+function step(msg) {
+  console.log(chalk.blue.bold(`\n${msg}`));
 }

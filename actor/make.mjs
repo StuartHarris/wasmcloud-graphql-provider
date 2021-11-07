@@ -1,6 +1,8 @@
 #!/usr/bin/env zx
 
 $.verbose = false;
+process.env.CARGO_TERM_COLOR = "always";
+process.env.FORCE_COLOR = "3";
 
 const claims = [
   "stuart-harris:graphql-provider",
@@ -18,13 +20,13 @@ const build = argv.debug ? "debug" : "release";
 $.verbose = true;
 
 if (argv.clean) {
-  console.log(chalk.blueBright.bold("Cleaning..."));
+  step("Cleaning...");
   await $`cargo clean`;
   await $`rm -rf build`;
 }
 
 if (argv.build) {
-  console.log(chalk.blueBright.bold("Building..."));
+  step("Building...");
   await $`cargo build ${build === "release" ? "--release" : ""}`;
 }
 
@@ -32,7 +34,7 @@ const unsigned_wasm = `target/wasm32-unknown-unknown/${build}/${project}.wasm`;
 const signed_wasm = `build/${project}_s.wasm`;
 
 if (argv.package) {
-  console.log(chalk.blueBright.bold("Packaging..."));
+  step("Packaging...");
   await $`mkdir -p build`;
 
   await $`wash claims sign ${unsigned_wasm} ${[
@@ -50,6 +52,10 @@ if (argv.package) {
 }
 
 if (argv.push) {
-  console.log(chalk.blueBright.bold("Pushing..."));
+  step("Pushing...");
   await $`wash reg push --insecure ${registry}/${project}:${version} ${signed_wasm}`;
+}
+
+function step(msg) {
+  console.log(chalk.blue.bold(`\n${msg}`));
 }
