@@ -1,23 +1,24 @@
 #!/usr/bin/env zx
 
-$.verbose = false;
+const config = {
+  claims: [
+    "stuart-harris:graphql-provider",
+    "wasmcloud:builtin:logging",
+    "wasmcloud:httpserver",
+  ],
+  registry: "registry:5001",
+};
+
 process.env.CARGO_TERM_COLOR = "always";
 process.env.FORCE_COLOR = "3";
 
-const claims = [
-  "stuart-harris:graphql-provider",
-  "wasmcloud:builtin:logging",
-  "wasmcloud:httpserver",
-];
-const registry = "registry:5001";
-
+$.verbose = false;
 const meta = JSON.parse(await $`cargo metadata --no-deps --format-version 1`);
+$.verbose = true;
 const project = meta.packages[0].name;
 const version = meta.packages[0].version;
 const revision = 0;
 const build = argv.debug ? "debug" : "release";
-
-$.verbose = true;
 
 if (argv.clean) {
   step("Cleaning...");
@@ -38,7 +39,7 @@ if (argv.package) {
   await $`mkdir -p build`;
 
   await $`wash claims sign ${unsigned_wasm} ${[
-    ...claims.flatMap((c) => ["--cap", c]),
+    ...config.claims.flatMap((c) => ["--cap", c]),
     "--name",
     project,
     "--ver",
@@ -53,7 +54,7 @@ if (argv.package) {
 
 if (argv.push) {
   step("Pushing...");
-  await $`wash reg push --insecure ${registry}/${project}:${version} ${signed_wasm}`;
+  await $`wash reg push --insecure ${config.registry}/${project}:${version} ${signed_wasm}`;
 }
 
 function step(msg) {

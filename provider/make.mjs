@@ -1,14 +1,17 @@
 #!/usr/bin/env zx
 
-$.verbose = false;
+const config = {
+  capability: "stuart-harris:graphql-provider",
+  vendor: "StuartHarris",
+  registry: "registry:5001",
+};
+
 process.env.CARGO_TERM_COLOR = "always";
 process.env.FORCE_COLOR = "3";
 
-const capability = "stuart-harris:graphql-provider";
-const registry = "registry:5001";
-const vendor = "StuartHarris";
-
+$.verbose = false;
 const meta = JSON.parse(await $`cargo metadata --no-deps --format-version 1`);
+$.verbose = true;
 const project = meta.packages[0].name;
 const version = meta.packages[0].version;
 const revision = 0;
@@ -21,8 +24,6 @@ const architectures = {
   x64: "x86_64",
 };
 const arch = `${architectures[os.arch()]}-${operating_systems[os.platform()]}`;
-
-$.verbose = true;
 
 if (argv.clean) {
   step("Cleaning...");
@@ -54,11 +55,11 @@ if (argv.package) {
     "--binary",
     source,
     "--capid",
-    capability,
+    config.capability,
     "--name",
     project,
     "--vendor",
-    vendor,
+    config.vendor,
     "--version",
     version,
     "--revision",
@@ -72,7 +73,7 @@ if (argv.package) {
 
 if (argv.push) {
   step("Pushing...");
-  await $`wash reg push --insecure ${registry}/${project}:${version} ${destination}`;
+  await $`wash reg push --insecure ${config.registry}/${project}:${version} ${destination}`;
 }
 
 function step(msg) {
