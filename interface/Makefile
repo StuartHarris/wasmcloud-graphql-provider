@@ -1,6 +1,3 @@
-.PHONY:default
-default: clean build
-
 .PHONY:build
 build:
 	cd rust && cargo build
