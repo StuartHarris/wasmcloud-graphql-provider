@@ -16,19 +16,11 @@ const project = meta.packages[0].name;
 const version = meta.packages[0].version;
 const revision = 0;
 const build = argv.debug ? "debug" : "release";
-const operating_systems = {
-  darwin: "macos",
-  linux: "linux",
-};
-const architectures = {
-  x64: "x86_64",
-};
-const arch = `${architectures[os.arch()]}-${operating_systems[os.platform()]}`;
 
 if (argv.clean) {
   step("Cleaning...");
   await $`cargo clean`;
-  await $`rm -rf build dist`;
+  await $`rm -rf build dist node_modules`;
 }
 
 if (argv.build) {
@@ -51,7 +43,7 @@ if (argv.package) {
 
   await $`wash par create ${[
     "--arch",
-    arch,
+    arch(),
     "--binary",
     source,
     "--capid",
@@ -78,4 +70,15 @@ if (argv.push) {
 
 function step(msg) {
   console.log(chalk.blue.bold(`\n${msg}`));
+}
+
+function arch() {
+  const operating_systems = {
+    darwin: "macos",
+    linux: "linux",
+  };
+  const architectures = {
+    x64: "x86_64", // todo add ARM
+  };
+  return `${architectures[os.arch()]}-${operating_systems[os.platform()]}`;
 }

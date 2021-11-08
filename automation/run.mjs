@@ -9,9 +9,7 @@ const PROVIDER = {
   id: "VAH3FDYDTRSPMDDHSO4TK6YOKXHZLFQ5QIT4TM4USZ4GKBU2BTJ2JIP5",
   ref: `${REGISTRY}/wasmcloud-graphql-provider:0.1.0`,
   contract: "stuart-harris:graphql-provider",
-  config: (await $`cat ../.env`).stdout
-    .replace("\n", "")
-    .replace("localhost", "host.docker.internal"),
+  config: (await fs.readFile("../.env")).toString().replace("\n", ""),
 };
 const HTTPSERVER = {
   id: "VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M",
@@ -20,34 +18,41 @@ const HTTPSERVER = {
   config: `config_b64=${btoa(JSON.stringify({ address: "0.0.0.0:8080" }))}`,
 };
 
-async function sys_up() {
+if (argv.up) {
   await $`docker compose up -d`;
+  await sleep(1000);
+  await retry({ count: 10, delay: 5000 }, async () => {
+    await $`sqlx database create`;
+    await $`sqlx migrate run`;
+  });
+  await $`WASMCLOUD_OCI_ALLOWED_INSECURE=registry:5001 ~/wasmcloud/bin/wasmcloud_host start`;
 }
 
-async function db_up() {
-  await $`sqlx database create`;
-  await $`sqlx migrate run`;
-}
-
-async function start() {
+if (argv.start) {
   await $`(cd ../actor && make push)`;
   await $`(cd ../provider && make push)`;
   await $`wash ctl start actor ${ACTOR.ref} --timeout 30`;
   await $`wash ctl start provider ${HTTPSERVER.ref} --link-name default --timeout 30`;
   await $`wash ctl start provider ${PROVIDER.ref} --link-name default --timeout 30`;
-}
-
-async function links() {
   await $`wash ctl link put ${ACTOR.id} ${HTTPSERVER.id} ${HTTPSERVER.contract} ${HTTPSERVER.config}`;
   await $`wash ctl link put ${ACTOR.id} ${PROVIDER.id} ${PROVIDER.contract} ${PROVIDER.config}`;
 }
 
-await sys_up();
-await retry({ count: 10, delay: 5000 }, db_up);
-await retry({ count: 10, delay: 5000 }, async () => {
-  await start();
-  await links();
-});
+if (argv.restart_provider) {
+  $.verbose = false;
+  const host = JSON.parse(await $`wash ctl get hosts --output json`).hosts[0]
+    .id;
+  $.verbose = true;
+  await $`wash ctl stop provider ${host} ${PROVIDER.id} default ${PROVIDER.contract} --timeout 30`;
+  await $`wash drain all`;
+  await $`wash ctl start provider ${PROVIDER.ref} --link-name default --timeout 30`;
+}
+
+if (argv.down) {
+  await $`~/wasmcloud/bin/wasmcloud_host stop`;
+  await $`docker compose down`;
+  await $`pkill -f wasmcloudcache`;
+}
 
 async function retry(
   { count, delay = 5000 },

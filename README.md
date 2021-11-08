@@ -6,7 +6,9 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 
 ## Getting started
 
-1. build and sign everything. If you're on MacOS, you may need to build the provider for Linux by running the provider's `make` in the dev container — for vscode, run (`cmd-shift-P`) `@command:remote-containers.reopenInContainer`.
+The default local setup is to run NATS, the registry, and the postgres database in Docker using the `automation/docker-compose.yaml` file, and to run `wasmcloud` natively.
+
+1. build and sign everything. If you're on MacOS, and you need to build the provider for Linux, you can run the provider's `make` in the dev container — for vscode, run (`cmd-shift-P`) `@command:remote-containers.reopenInContainer`.
 
    ```sh
    make
@@ -17,7 +19,7 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
    (cd provider && make)
    ```
 
-1. run up a system (postgres DB, pgAdmin, OCI registry, NATS, wasmCloud)
+2. run up a system (postgres DB, pgAdmin, OCI registry, NATS, wasmCloud)
 
    ```sh
    # install `sqlx-cli` to create db and run migrations
@@ -31,17 +33,16 @@ Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.de
 
 
    # bring everything up
-   cd automation
-   ./up.mjs
+   (cd automation && ./run.mjs --up --start)
 
    # test
    curl -vv -H 'Content-Type: application/json' -d@query.json localhost:8080
 
-   # or point GraphQL playground at http://localhost:8080
-
+   # bring everything down
+   (cd automation && ./run.mjs --down)
    ```
 
-1. Some example GraphQL queries:
+3. Some example GraphQL queries:
 
    ```graphql
    query get_all {
