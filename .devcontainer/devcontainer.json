@@ -14,7 +14,9 @@
     "--init",
     "--cap-add=SYS_PTRACE",
     "--security-opt",
-    "seccomp=unconfined"
+    "seccomp=unconfined",
+    "--add-host",
+    "registry:192.168.65.2"
   ],
 
   // Set *default* container specific settings.json values on container create.
