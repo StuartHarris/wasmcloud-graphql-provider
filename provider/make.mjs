@@ -1,19 +1,16 @@
 #!/usr/bin/env zx
 
+import { getProject, ifChanged, setColors, step } from "../automation/lib.mjs";
+
 const config = {
   capability: "stuart-harris:graphql-provider",
   vendor: "StuartHarris",
   registry: "registry:5001",
 };
 
-process.env.CARGO_TERM_COLOR = "always";
-process.env.FORCE_COLOR = "3";
+setColors();
 
-$.verbose = false;
-const meta = JSON.parse(await $`cargo metadata --no-deps --format-version 1`);
-$.verbose = true;
-const project = meta.packages[0].name;
-const version = meta.packages[0].version;
+const { name: project, version } = await getProject();
 const revision = 0;
 const build = argv.debug ? "debug" : "release";
 
@@ -25,13 +22,15 @@ if (argv.clean) {
 
 if (argv.build) {
   step("Building...");
-  await $`yarn`;
-  await $`yarn build`;
-  await $`yarn --production`;
-  await $`mkdir -p build`;
-  await $`tar -czf build/build.tgz node_modules dist`;
-  await $`cargo build ${build === "release" ? "--release" : ""}`;
-  await $`yarn`; // re-add dev deps for next edit
+  await ifChanged(".", "./build", async () => {
+    await $`yarn`;
+    await $`yarn build`;
+    await $`yarn --production`;
+    await $`mkdir -p build`;
+    await $`tar -czf build/build.tgz node_modules dist`;
+    await $`yarn`; // re-add dev deps for next edit
+    await $`cargo build ${build === "release" ? "--release" : ""}`;
+  });
 }
 
 const source = `target/${build}/${project}`;
@@ -43,7 +42,7 @@ if (argv.package) {
 
   await $`wash par create ${[
     "--arch",
-    arch(),
+    getArch(),
     "--binary",
     source,
     "--capid",
@@ -66,19 +65,4 @@ if (argv.package) {
 if (argv.push) {
   step("Pushing...");
   await $`wash reg push --insecure ${config.registry}/${project}:${version} ${destination}`;
-}
-
-function step(msg) {
-  console.log(chalk.blue.bold(`\n${msg}`));
-}
-
-function arch() {
-  const operating_systems = {
-    darwin: "macos",
-    linux: "linux",
-  };
-  const architectures = {
-    x64: "x86_64", // todo add ARM
-  };
-  return `${architectures[os.arch()]}-${operating_systems[os.platform()]}`;
 }

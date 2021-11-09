@@ -1,5 +1,7 @@
 #!/usr/bin/env zx
 
+import { getProject, ifChanged, setColors, step } from "../automation/lib.mjs";
+
 const config = {
   claims: [
     "stuart-harris:graphql-provider",
@@ -9,14 +11,9 @@ const config = {
   registry: "registry:5001",
 };
 
-process.env.CARGO_TERM_COLOR = "always";
-process.env.FORCE_COLOR = "3";
+setColors();
 
-$.verbose = false;
-const meta = JSON.parse(await $`cargo metadata --no-deps --format-version 1`);
-$.verbose = true;
-const project = meta.packages[0].name;
-const version = meta.packages[0].version;
+const { name: project, version } = await getProject();
 const revision = 0;
 const build = argv.debug ? "debug" : "release";
 
@@ -28,7 +25,11 @@ if (argv.clean) {
 
 if (argv.build) {
   step("Building...");
-  await $`cargo build ${build === "release" ? "--release" : ""}`;
+  await ifChanged(
+    ".",
+    "./build",
+    () => $`cargo build ${build === "release" ? "--release" : ""}`
+  );
 }
 
 const unsigned_wasm = `target/wasm32-unknown-unknown/${build}/${project}.wasm`;
@@ -55,8 +56,4 @@ if (argv.package) {
 if (argv.push) {
   step("Pushing...");
   await $`wash reg push --insecure ${config.registry}/${project}:${version} ${signed_wasm}`;
-}
-
-function step(msg) {
-  console.log(chalk.blue.bold(`\n${msg}`));
 }

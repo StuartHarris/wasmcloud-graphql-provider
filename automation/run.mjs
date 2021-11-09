@@ -1,5 +1,9 @@
 #!/usr/bin/env zx
 
+import { retry, setColors, step } from "./lib.mjs";
+
+setColors();
+
 const REGISTRY = "registry:5001";
 const ACTOR = {
   id: "MA5PVZ6QNJK5TELQHPQGICJJ2EFVH7YDVXKF2NCUTYGSVVHUCEOL5UW6",
@@ -19,6 +23,7 @@ const HTTPSERVER = {
 };
 
 if (argv.up) {
+  step("Starting containers");
   await $`docker compose up -d`;
   await sleep(1000);
   await retry({ count: 10, delay: 5000 }, async () => {
@@ -29,6 +34,7 @@ if (argv.up) {
 }
 
 if (argv.start) {
+  step("starting workloads");
   await $`(cd ../actor && make push)`;
   await $`(cd ../provider && make push)`;
   await $`wash ctl start actor ${ACTOR.ref} --timeout 30`;
@@ -39,6 +45,7 @@ if (argv.start) {
 }
 
 if (argv.restart_provider) {
+  step("restarting provider");
   $.verbose = false;
   const host = JSON.parse(await $`wash ctl get hosts --output json`).hosts[0]
     .id;
@@ -49,23 +56,8 @@ if (argv.restart_provider) {
 }
 
 if (argv.down) {
+  step("stopping containers");
   await $`~/wasmcloud/bin/wasmcloud_host stop`;
   await $`docker compose down`;
   await $`pkill -f wasmcloudcache`;
-}
-
-async function retry(
-  { count, delay = 5000 },
-  f,
-  evaluator = async () => false
-) {
-  for (let i = 0; i < count; i++) {
-    try {
-      return await f();
-    } catch (e) {
-      let done = await evaluator(e);
-      if (done) return e;
-      await new Promise((Y) => setTimeout(Y, delay));
-    }
-  }
 }
