@@ -34,15 +34,22 @@ The default local setup is to run NATS, the registry, and the postgres database 
    # create a .env file with the database url, e.g.
    echo `DATABASE_URL=postgresql://postgres:changeme@localhost:5432/todos` >.env
 
+   cd automation
 
-   # bring everything up
-   (cd automation && ./run.mjs --up --start)
+   # bring up the docker containers and wasmcloud
+   ./run.mjs --up
+
+   # bring up the actor, providers and links
+   ./run.mjs --start
+
+   # tail the logs — you should see "postgraphile initializing at postgresql:****@localhost:5432/todos"
+   tail -f  ~/wasmcloud/var/log/erlang.log.1
 
    # test
    curl -vv -H 'Content-Type: application/json' -d@query.json localhost:8080
 
    # bring everything down
-   (cd automation && ./run.mjs --down)
+   ./run.mjs --down
    ```
 
 3. Some example GraphQL queries:

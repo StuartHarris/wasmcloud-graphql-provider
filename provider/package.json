@@ -4,9 +4,7 @@
   "description": "",
   "license": "ISC",
   "author": "",
-  "main": "dist/src/index.js",
   "scripts": {
-    "start": "yarn build && node dist/src/middleware.js",
     "build": "tsc --project ./"
   },
   "dependencies": {

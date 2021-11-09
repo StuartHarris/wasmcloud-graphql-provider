@@ -1,6 +1,12 @@
 #!/usr/bin/env zx
 
-import { getProject, ifChanged, setColors, step } from "../automation/lib.mjs";
+import {
+  getArch,
+  getProject,
+  ifChanged,
+  setColors,
+  step,
+} from "../automation/lib.mjs";
 
 const config = {
   capability: "stuart-harris:graphql-provider",
@@ -17,17 +23,17 @@ const build = argv.debug ? "debug" : "release";
 if (argv.clean) {
   step("Cleaning...");
   await $`cargo clean`;
-  await $`rm -rf build dist node_modules`;
+  await $`rm -rf build node_modules`;
 }
 
 if (argv.build) {
   step("Building...");
   await ifChanged(".", "./build", async () => {
+    await $`mkdir -p ./build/dist`;
     await $`yarn`;
     await $`yarn build`;
     await $`yarn --production`;
-    await $`mkdir -p build`;
-    await $`tar -czf build/build.tgz node_modules dist`;
+    await $`tar -czf ./build/build.tgz node_modules -C build dist`;
     await $`yarn`; // re-add dev deps for next edit
     await $`cargo build ${build === "release" ? "--release" : ""}`;
   });

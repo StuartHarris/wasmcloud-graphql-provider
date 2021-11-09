@@ -30,6 +30,7 @@ if (argv.up) {
     await $`sqlx database create`;
     await $`sqlx migrate run`;
   });
+  await $`rm ~/wasmcloud/var/log/erlang.log.*`;
   await $`WASMCLOUD_OCI_ALLOWED_INSECURE=registry:5001 ~/wasmcloud/bin/wasmcloud_host start`;
 }
 
@@ -38,10 +39,12 @@ if (argv.start) {
   await $`(cd ../actor && make push)`;
   await $`(cd ../provider && make push)`;
   await $`wash ctl start actor ${ACTOR.ref} --timeout 30`;
-  await $`wash ctl start provider ${HTTPSERVER.ref} --link-name default --timeout 30`;
-  await $`wash ctl start provider ${PROVIDER.ref} --link-name default --timeout 30`;
+
   await $`wash ctl link put ${ACTOR.id} ${HTTPSERVER.id} ${HTTPSERVER.contract} ${HTTPSERVER.config}`;
+  await $`wash ctl start provider ${HTTPSERVER.ref} --link-name default --timeout 30`;
+
   await $`wash ctl link put ${ACTOR.id} ${PROVIDER.id} ${PROVIDER.contract} ${PROVIDER.config}`;
+  await $`wash ctl start provider ${PROVIDER.ref} --link-name default --timeout 30`;
 }
 
 if (argv.restart_provider) {

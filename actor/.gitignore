@@ -3,7 +3,6 @@
 
 ## Build
 /build
-/dist/
 /target
 **target
 
@@ -37,4 +36,3 @@ __pycache__/
 ## Node
 **node_modules
 **package-lock.json
-
