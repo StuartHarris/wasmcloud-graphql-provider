@@ -17,14 +17,15 @@ export async function retry(
 }
 
 export async function ifChanged(inputDir, outputDir, fn) {
-  const shaFile = `${outputDir}/.sha`;
-  let previous = "";
+  const verbosity = $.verbose;
   $.verbose = false;
+  const shaFile = path.join(await cwd(), `${outputDir}/.sha`);
+  let previous = "";
   try {
-    previous = (await fs.readFile(shaFile)).toString().trimEnd("\n");
+    previous = (await fs.readFile(shaFile)).toString().trim();
   } catch {}
-  let current = (await $`dirsh ${inputDir}`).stdout.trimEnd("\n");
-  $.verbose = true;
+  let current = (await $`dirsh ${inputDir}`).stdout.trim();
+  $.verbose = verbosity;
   console.log({ previous, current });
   if (previous !== current) {
     await fn();
@@ -43,10 +44,14 @@ export function getArch() {
   return `${architectures[os.arch()]}-${operating_systems[os.platform()]}`;
 }
 
-export async function getProject() {
+export async function getProject(dir) {
+  const verbosity = $.verbose;
   $.verbose = false;
+  const previous = await cwd();
+  dir && cd(dir);
   const meta = JSON.parse(await $`cargo metadata --no-deps --format-version 1`);
-  $.verbose = true;
+  cd(previous);
+  $.verbose = verbosity;
   return meta.packages[0];
 }
 
@@ -57,4 +62,12 @@ export function step(msg) {
 export function setColors() {
   process.env.CARGO_TERM_COLOR = "always";
   process.env.FORCE_COLOR = "3";
+}
+
+export async function cwd() {
+  const verbosity = $.verbose;
+  $.verbose = false;
+  const cwd = (await $`pwd`).stdout.trim();
+  $.verbose = verbosity;
+  return cwd;
 }

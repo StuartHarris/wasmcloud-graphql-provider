@@ -1,6 +1,5 @@
 .PHONY:default
-default:
-	./make.mjs --build --package --push
+default: build
 
 .PHONY:clean
 clean:
@@ -8,7 +7,7 @@ clean:
 
 .PHONY:build
 build:
-	./make.mjs --build --package
+	./make.mjs --build
 
 .PHONY:push
 push:

@@ -30,7 +30,7 @@ pub type QueryResult = Result<String>;
 /// - todo: work out if we can have isolated instances
 pub fn init(database_url: &str, node_files: &str) {
     let database_url = database_url.to_owned();
-    let module_path = format!("{}/dist/src/index.js", node_files);
+    let module_path = format!("{}/src/index.js", node_files);
     sync_node(move |mut cx| {
         // load module
         let require: Handle<JsFunction> = cx

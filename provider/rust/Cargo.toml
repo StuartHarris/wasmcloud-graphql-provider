@@ -19,7 +19,7 @@ tar = "0.4.37"
 temp-dir = "0.1.11"
 tokio = {version = "1.12.0", features = ["full"]}
 wasmbus-rpc = "0.5.2"
-wasmcloud-graphql-interface = {path = "../interface/rust"}
+wasmcloud-graphql-interface = {path = "../../interface/rust"}
 
 [build-dependencies]
 anyhow = "1.0.44"

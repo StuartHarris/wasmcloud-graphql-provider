@@ -23,37 +23,32 @@ if (argv.clean) {
   await $`rm -rf build`;
 }
 
+const destination = `build/${project}_s.wasm`;
+
 if (argv.build) {
   step("Building...");
-  await ifChanged(
-    ".",
-    "./build",
-    () => $`cargo build ${build === "release" ? "--release" : ""}`
-  );
-}
+  await ifChanged(".", "build", async () => {
+    await $`cargo build ${build === "release" ? "--release" : ""}`;
+    await fs.ensureDir("build");
 
-const unsigned_wasm = `target/wasm32-unknown-unknown/${build}/${project}.wasm`;
-const signed_wasm = `build/${project}_s.wasm`;
+    const source = `target/wasm32-unknown-unknown/${build}/${project}.wasm`;
+    await $`wash claims sign ${source} ${[
+      ...config.claims.flatMap((c) => ["--cap", c]),
+      "--name",
+      project,
+      "--ver",
+      version,
+      "--rev",
+      revision,
+      "--destination",
+      `build/${project}_s.wasm`,
+    ]}`;
+  });
 
-if (argv.package) {
-  step("Packaging...");
-  await $`mkdir -p build`;
-
-  await $`wash claims sign ${unsigned_wasm} ${[
-    ...config.claims.flatMap((c) => ["--cap", c]),
-    "--name",
-    project,
-    "--ver",
-    version,
-    "--rev",
-    revision,
-    "--destination",
-    `build/${project}_s.wasm`,
-  ]}`;
-  await $`wash claims inspect ${signed_wasm}`;
+  await $`wash claims inspect ${destination}`;
 }
 
 if (argv.push) {
   step("Pushing...");
-  await $`wash reg push --insecure ${config.registry}/${project}:${version} ${signed_wasm}`;
+  await $`wash reg push --insecure ${config.registry}/${project}:${version} ${destination}`;
 }
