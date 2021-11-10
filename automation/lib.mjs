@@ -24,7 +24,7 @@ export async function ifChanged(inputDir, outputDir, fn) {
   try {
     previous = (await fs.readFile(shaFile)).toString().trim();
   } catch {}
-  let current = (await $`dirsh ${inputDir}`).stdout.trim();
+  const current = (await $`dirsh ${inputDir}`).stdout.trim();
   $.verbose = verbosity;
   console.log({ previous, current });
   if (previous !== current) {

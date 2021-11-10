@@ -25,7 +25,7 @@ The default local setup is to run NATS, the registry, and the postgres database 
    # install `sqlx-cli` to create db and run migrations
    cargo install sqlx-cli
 
-   # install `dirsh` to check if inputs have changed for build  optimisation
+   # install `dirsh` to check if inputs have changed for build optimisation
    cargo install dirsh
 
    # install `zx` to run scripts
