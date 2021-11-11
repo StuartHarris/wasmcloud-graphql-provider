@@ -26,11 +26,11 @@ if (argv.clean) {
 const destination = `build/${project}_s.wasm`;
 
 if (argv.build) {
-  step("Building...");
-  await ifChanged(".", "build", async () => {
-    await $`cargo build ${build === "release" ? "--release" : ""}`;
-    await fs.ensureDir("build");
+  await fs.ensureDir("build");
 
+  step("Building actor...");
+  await ifChanged([".", "../interface"], "build", async () => {
+    await $`cargo build ${build === "release" ? "--release" : ""}`;
     const source = `target/wasm32-unknown-unknown/${build}/${project}.wasm`;
     await $`wash claims sign ${source} ${[
       ...config.claims.flatMap((c) => ["--cap", c]),

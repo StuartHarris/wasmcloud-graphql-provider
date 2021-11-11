@@ -16,7 +16,7 @@ export async function retry(
   }
 }
 
-export async function ifChanged(inputDir, outputDir, fn) {
+export async function ifChanged(inputDirs, outputDir, fn) {
   const verbosity = $.verbose;
   $.verbose = false;
   const shaFile = path.join(await cwd(), `${outputDir}/.sha`);
@@ -24,7 +24,7 @@ export async function ifChanged(inputDir, outputDir, fn) {
   try {
     previous = (await fs.readFile(shaFile)).toString().trim();
   } catch {}
-  const current = (await $`dirsh ${inputDir}`).stdout.trim();
+  const current = (await $`dirsh ${inputDirs}`).stdout.trim();
   $.verbose = verbosity;
   console.log({ previous, current });
   if (previous !== current) {

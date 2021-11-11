@@ -41,7 +41,7 @@ if (argv.build) {
   await fs.ensureDir("node/build");
   await fs.ensureDir("rust/build");
 
-  step("Building node...");
+  step("Building postgraphile...");
   cd("node");
   await ifChanged(".", "build", async () => {
     await $`yarn`;
@@ -51,9 +51,9 @@ if (argv.build) {
     await $`yarn`; // re-add dev deps for next edit
   });
 
-  step("Building rust...");
+  step("Building provider...");
   cd("rust");
-  await ifChanged([".", "../node"], "build", async () => {
+  await ifChanged([".", "../node", "../../interface"], "build", async () => {
     await $`cargo build ${build === "release" ? "--release" : ""}`;
 
     cd(".");
