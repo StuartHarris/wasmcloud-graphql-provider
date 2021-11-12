@@ -1,11 +1,14 @@
-.PHONY: build
-build:
-	cd interface && $(MAKE)
-	cd actor && $(MAKE)
-	cd provider && $(MAKE)
+.PHONY:default
+default: build
 
-.PHONY: clean
+.PHONY:clean
 clean:
-	cd interface && $(MAKE) clean
-	cd actor && $(MAKE) clean
-	cd provider && $(MAKE) clean
+	./make.mjs --clean
+
+.PHONY:build
+build:
+	./make.mjs --build
+
+.PHONY:push
+push:
+	./make.mjs --push

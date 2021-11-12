@@ -25,11 +25,14 @@ The default local setup is to run NATS, the registry, and the postgres database 
    # install `sqlx-cli` to create db and run migrations
    cargo install sqlx-cli
 
+   # install `zx` to run scripts
+   npm install -g zx
+
    # install `dirsh` to check if inputs have changed for build optimisation
    cargo install dirsh
 
-   # install `zx` to run scripts
-   npm install -g zx
+   # optional: install `monobuild` to support building all changed dependencies in CI pipelines
+   cargo install --git https://github.com/charypar/monobuild
 
    # create a .env file with the database url, e.g.
    echo `DATABASE_URL=postgresql://postgres:changeme@localhost:5432/todos` >.env
