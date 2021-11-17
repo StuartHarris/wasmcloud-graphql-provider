@@ -17,7 +17,7 @@ const PROVIDER = {
 };
 const HTTPSERVER = {
   id: "VAG3QITQQ2ODAOWB5TTQSDJ53XK3SHBEIFNK4AYJ5RKAX2UNSCAPHA5M",
-  ref: "wasmcloud.azurecr.io/httpserver:0.14.5",
+  ref: "wasmcloud.azurecr.io/httpserver:0.14.6",
   contract: "wasmcloud:httpserver",
   config: `config_b64=${btoa(JSON.stringify({ address: "0.0.0.0:8080" }))}`,
 };
@@ -30,7 +30,7 @@ if (argv.up) {
     await $`sqlx database create`;
     await $`sqlx migrate run`;
   });
-  await $`rm ~/wasmcloud/var/log/erlang.log.*`;
+  await $`rm -f ~/wasmcloud/var/log/erlang.log.*`;
   await $`WASMCLOUD_OCI_ALLOWED_INSECURE=registry:5001 ~/wasmcloud/bin/wasmcloud_host start`;
 }
 
@@ -49,13 +49,20 @@ if (argv.start) {
 
 if (argv.restart_provider) {
   step("restarting provider");
-  $.verbose = false;
-  const host = JSON.parse(await $`wash ctl get hosts --output json`).hosts[0]
-    .id;
-  $.verbose = true;
+  const host = await getHost();
   await $`wash ctl stop provider ${host} ${PROVIDER.id} default ${PROVIDER.contract} --timeout 30`;
   await $`wash drain all`;
   await $`wash ctl start provider ${PROVIDER.ref} --link-name default --timeout 30`;
+}
+
+if (argv.stop) {
+  step("stop workloads");
+  const host = await getHost();
+  await $`wash ctl stop actor ${host} ${ACTOR.id} --timeout 30`;
+  await $`wash ctl stop provider ${host} ${PROVIDER.id} default ${PROVIDER.contract} --timeout 30`;
+  await $`wash ctl stop provider ${host} ${HTTPSERVER.id} default ${HTTPSERVER.contract} --timeout 30`;
+  await $`wash ctl link del ${ACTOR.id} ${PROVIDER.contract}`;
+  await $`wash ctl link del ${ACTOR.id} ${HTTPSERVER.contract}`;
 }
 
 if (argv.down) {
@@ -63,4 +70,12 @@ if (argv.down) {
   await $`~/wasmcloud/bin/wasmcloud_host stop`;
   await $`docker compose down`;
   await $`pkill -f wasmcloudcache`;
+}
+
+async function getHost() {
+  $.verbose = false;
+  const host = JSON.parse(await $`wash ctl get hosts --output json`).hosts[0]
+    .id;
+  $.verbose = true;
+  return host;
 }
