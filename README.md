@@ -1,6 +1,6 @@
 # `wasmcloud-graphql-provider`
 
-Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.dev) 0.50 capability provider, exposing a postgres database as a GraphQL API for actors to consume.
+Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.dev) 0.50.2 capability provider, exposing a postgres database as a GraphQL API for actors to consume.
 
 ![architecture](docs/GraphQL%20Provider.svg)
 

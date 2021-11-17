@@ -13,7 +13,7 @@ async-trait = "0.1.51"
 futures = "0.3.17"
 serde = {version = "1.0.130", features = ["derive"]}
 serde_bytes = "0.11.5"
-wasmbus-rpc = "0.5.2"
+wasmbus-rpc = "0.5.5"
 wasmcloud-graphql-interface = {path = "../interface/rust"}
 wasmcloud-interface-httpserver = "0.2.0"
 wasmcloud-interface-logging = "0.2.0"
