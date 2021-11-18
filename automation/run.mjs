@@ -67,9 +67,9 @@ if (argv.stop) {
 
 if (argv.down) {
   step("stopping containers");
-  await $`~/wasmcloud/bin/wasmcloud_host stop`;
+  await nothrow($`~/wasmcloud/bin/wasmcloud_host stop`);
   await $`docker compose down`;
-  await $`pkill -f wasmcloudcache`;
+  await nothrow($`pkill -f wasmcloudcache`);
 }
 
 async function getHost() {

@@ -25,7 +25,7 @@ The default local setup is to run NATS, the registry, and the postgres database 
    # install `sqlx-cli` to create db and run migrations
    cargo install sqlx-cli
 
-   # install `zx` to run scripts
+   # install `zx` (https://github.com/google/zx) to run scripts
    npm install -g zx
 
    # install `dirsh` to check if inputs have changed for build optimisation
