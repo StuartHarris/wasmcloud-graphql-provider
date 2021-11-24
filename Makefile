@@ -3,12 +3,18 @@ default: build
 
 .PHONY:clean
 clean:
-	./make.mjs --clean
+	cd interface && $(MAKE) clean
+	cd actor && $(MAKE) clean
+	cd provider && $(MAKE) clean
 
 .PHONY:build
 build:
-	./make.mjs --build
+	cd interface && $(MAKE) build
+	cd actor && $(MAKE) build
+	cd provider && $(MAKE) build
 
 .PHONY:push
 push:
-	./make.mjs --push
+	cd interface && $(MAKE) push
+	cd actor && $(MAKE) push
+	cd provider && $(MAKE) push
