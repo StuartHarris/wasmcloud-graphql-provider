@@ -47,11 +47,21 @@ if (argv.start) {
   await $`wash ctl start provider ${PROVIDER.ref} --link-name default --timeout 30`;
 }
 
+if (argv.restart_actor) {
+  step("restarting actor");
+  const host = await getHost();
+  await $`wash ctl stop actor ${host} ${ACTOR.id} --timeout 30`;
+  await $`wash drain all`;
+  await $`(cd ../actor && make push)`;
+  await $`wash ctl start actor ${ACTOR.ref} --timeout 30`;
+}
+
 if (argv.restart_provider) {
   step("restarting provider");
   const host = await getHost();
   await $`wash ctl stop provider ${host} ${PROVIDER.id} default ${PROVIDER.contract} --timeout 30`;
   await $`wash drain all`;
+  await $`(cd ../provider && make push)`;
   await $`wash ctl start provider ${PROVIDER.ref} --link-name default --timeout 30`;
 }
 
