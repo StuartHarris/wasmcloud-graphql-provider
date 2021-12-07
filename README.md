@@ -1,12 +1,12 @@
 # `wasmcloud-graphql-provider`
 
-Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.dev) 0.50.3 capability provider, exposing a postgres database as a GraphQL API for actors to consume.
+Hosts [PostGraphile](https://graphile.org) as a [wasmCloud](https://wasmcloud.dev) 0.51.2 capability provider, exposing a postgres database as a GraphQL API for actors to consume.
 
 ![architecture](docs/GraphQL%20Provider.svg)
 
 ## Getting started
 
-The default local setup is to run NATS, the registry, and the postgres database in Docker using the `automation/docker-compose.yaml` file, and to run `wasmcloud` natively.
+The default local setup is to run NATS, the registry, and the postgres database in Docker using the `automation/docker-compose.yaml` file, and to run `wasmcloud` natively (the script expects wasmCloud 0.51.2 to be installed to `~/wasmcloud`).
 
 1. build and sign everything. If you're on MacOS, and you need to build the provider for Linux, you can run the provider's `make` in the dev container — for vscode, run (`cmd-shift-P`) `@command:remote-containers.reopenInContainer`.
 
